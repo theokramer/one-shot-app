@@ -1,0 +1,77 @@
+{
+  "_comment": "Template. The real file lives at ~/.one-shot-app/config.json (created on first use, chmod 600), never in the skill folder or a repo, never printed. Secrets are entered with `setup.py secret <field>` in the user's own terminal. Phase 4 (preflight.py --modules …) only requires the fields the ticked modules need. Personal, non-secret data lives in ~/.one-shot-app/profile.json.",
+  "developer": {
+    "_required": "appleTeamID, bundleIdPrefix, githubOwner (if GitHub is ticked)",
+    "appleTeamID": "",
+    "bundleIdPrefix": "",
+    "githubOwner": "",
+    "appleAccountEmail": "",
+    "_appleTeamID": "The TEAM id (ASC → Membership). Not the personal id shown on the signing certificate (both are 10 characters; take the one from ASC → Membership).",
+    "_appleAccountEmail": "The Apple ID that owns the developer account. The app record is created by `rc setup apple` in the user's terminal (Apple ID password + 2FA typed by the user, never by the assistant)."
+  },
+  "projects": {
+    "parentDir": "~/Documents"
+  },
+  "appStoreConnect": {
+    "_comment": "REQUIRED. App Store Connect → Users and Access → Integrations → App Store Connect API → generate a team key with App Manager access. The .p8 downloads exactly once; put it somewhere outside any repo and point privateKeyPath at it. Phase 0 loads it into the Superwall ASC proxy (`superwall asc keys set`) so app records and subscriptions can be created without minting a local JWT, and Phase 8 base64-encodes it straight from this path into the GitHub secret. The file is never copied into a repo and never printed.",
+    "keyId": "",
+    "issuerId": "",
+    "privateKeyPath": ""
+  },
+  "revenuecat": {
+    "_comment": "Driven by the `rc` CLI (`brew install revenuecat/tap/rc`, `rc auth login`). Always --project-id, never change the default project, never the RevenueCat MCP or dashboard. apiV2Key is only a fallback for assets/scripts/revenuecat.py if rc is unavailable.",
+    "apiV2Key": "",
+    "apiBase": "https://api.revenuecat.com/v2",
+    "useCLI": true
+  },
+  "superwall": {
+    "_comment": "The `superwall` CLI holds its own OAuth session (`superwall login`). Paywalls are written as code (`superwall create`, `npx superwall@latest publish`); the app also ships a native fallback paywall.",
+    "useCLI": true
+  },
+  "gemini": {
+    "_comment": "Optional. Icon concepts, translations, abstract textures, short video clips, all only within the run's spend cap. Gemini never draws UI, text or devices. A Gemini subscription does not fund this API key; a 429 'spending cap' means raising the cap in Google Cloud. Models: gemini-3-pro-image, gemini-3.1-flash-image, gemini-omni-1.2-flash (video), gemini-2.5-flash (text).",
+    "apiKey": ""
+  },
+  "netlify": {
+    "_comment": "Optional fallback website host. Cloudflare is the default.",
+    "authToken": "",
+    "sitePrefix": ""
+  },
+  "github": {
+    "_comment": "The autonomous review loop. reviewer must be the literal string 'Copilot' — the API rejects 'copilot-pull-request-reviewer' with 422. With autoMerge true the skill merges its own PR once CI is green and Copilot's comments are addressed, which is what triggers the App Store upload.",
+    "reviewer": "Copilot",
+    "autoMerge": true,
+    "reviewTimeoutSeconds": 420
+  },
+  "appStoreDeploy": {
+    "_comment": "When true, Phase 8 arms APP_STORE_DEPLOY_ENABLED so a merge to main archives and uploads. The workflow still fails harmlessly until the app record and subscriptions exist in App Store Connect.",
+    "armOnSetup": true
+  },
+  "supabase": {
+    "_comment": "Only needed when the app requires a backend. Access token from supabase.com/dashboard/account/tokens.",
+    "accessToken": "",
+    "organizationId": ""
+  },
+  "defaults": {
+    "deploymentTarget": "17.0",
+    "swiftVersion": "5.0",
+    "targetedDeviceFamily": "1",
+    "supportedPlatforms": "iphoneos iphonesimulator",
+    "stack": "expo",
+    "languages": [
+      "en-US",
+      "de-DE"
+    ],
+    "pricing": {
+      "weekly": "6.99",
+      "yearly": "39.99",
+      "trialDays": 3,
+      "currency": "USD"
+    },
+    "qaSimulatorDevice": "iPhone 17 Pro"
+  },
+  "cloudflare": {
+    "_comment": "Default backend + website host. `npx wrangler login` once. workersSubdomain is the <x>.workers.dev part.",
+    "workersSubdomain": ""
+  }
+}

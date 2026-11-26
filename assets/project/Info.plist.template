@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>__DISPLAY_NAME__</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!-- Required for every upload. Set to false unless the app uses non-exempt
+	     encryption beyond standard HTTPS; otherwise every build is blocked on a
+	     compliance question in App Store Connect. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<key>LSApplicationCategoryType</key>
+	<string>__CATEGORY__</string>
+
+	<!-- PERMISSIONS: add one key per permission the app actually requests, and
+	     delete the rest. An unused usage string is a review flag; a missing one
+	     is a crash. Each string must say what the app does with the data, and
+	     where true, that it stays on device.
+
+	<key>NSCameraUsageDescription</key>
+	<string>__DISPLAY_NAME__ uses the camera to …</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>__DISPLAY_NAME__ saves where … It stays on your device.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>__DISPLAY_NAME__ saves … to your photo library.</string>
+	-->
+
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UILaunchScreen</key>
+		<dict/>
+	</dict>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Dark</string>
+
+	<!-- ENVIRONMENT: each of these reads a build setting defined in both the
+	     Debug and Release configurations of project.pbxproj, so the value can
+	     differ per configuration and never gets hardcoded in Swift. Publishable
+	     keys only — anything secret belongs in an edge function or CI secret.
+	     Delete the block if the app has no backend.
+
+	<key>__APP_NAME__SupabaseURL</key>
+	<string>$(SUPABASE_URL)</string>
+	<key>__APP_NAME__SupabasePublishableKey</key>
+	<string>$(SUPABASE_PUBLISHABLE_KEY)</string>
+	<key>__APP_NAME__WebsiteBaseURL</key>
+	<string>$(WEBSITE_URL)</string>
+	-->
+</dict>
+</plist>

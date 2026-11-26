@@ -1,0 +1,8 @@
+# Personal data never belongs in the skill (it lives in ~/.one-shot-app/)
+config.json
+profile.json
+learnings.local.md
+*.p8
+dist/
+__pycache__/
+.DS_Store

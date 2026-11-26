@@ -1,0 +1,36 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SPM
+.swiftpm/
+.build/
+
+# Credentials — none of these ever belong in the repo
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+.env
+.env.*
+config.json
+secrets.json
+
+# Supabase
+supabase/.temp/
+supabase/.branches/
+
+# macOS
+.DS_Store
+
+# Generated marketing assets are large and reproducible; keep the finals only
+screenshots/captured/

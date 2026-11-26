@@ -1,0 +1,64 @@
+{
+  "_comment": "Template for the one-shot-app library: everything the skill learns about its user, so no run asks the same thing twice. The real file lives at ~/.one-shot-app/profile.json (created on first use), never in the skill folder or a repo. Imprint fields are published on each app's website; reviewContact goes to App Review only; nothing else leaves the machine. Secrets belong in ~/.one-shot-app/config.json.",
+  "version": 1,
+  "identity": {
+    "_comment": "Who publishes the apps.",
+    "fullName": "",
+    "displayName": "",
+    "language": "",
+    "email": ""
+  },
+  "imprint": {
+    "_comment": "Impressum (German §5 DDG; §18 MStV for editorial content). Published on every app's /imprint page. The address must be a real postal address for service of documents (no PO box); a c/o imprint service address is fine if it accepts mail. confirmedAt = when the user last confirmed these, re-confirm after 12 months.",
+    "name": "",
+    "companyName": "",
+    "legalForm": "",
+    "street": "",
+    "postalCode": "",
+    "city": "",
+    "country": "",
+    "email": "",
+    "phone": "",
+    "vatId": "",
+    "registerEntry": "",
+    "responsibleForContent": "",
+    "confirmedAt": ""
+  },
+  "reviewContact": {
+    "_comment": "App Review contact in App Store Connect. Not published.",
+    "firstName": "",
+    "lastName": "",
+    "email": "",
+    "phone": ""
+  },
+  "accounts": {
+    "_comment": "Non-secret account IDs reused across apps, so attended steps get shorter every run.",
+    "metaAdAccountId": "",
+    "metaBusinessPortfolioId": "",
+    "tiktokAdvertiserId": "",
+    "cloudflareWorkersSubdomain": "",
+    "supportEmail": ""
+  },
+  "menuDefaults": {
+    "_comment": "The answers from the last run's menu. The next run marks these options '(Same as last time)', so a repeat run is a few clicks.",
+    "money": [],
+    "backend": [],
+    "growth": [],
+    "stack": "",
+    "visuals": [],
+    "offers": [],
+    "languages": "",
+    "runStyle": "",
+    "spendCap": "",
+    "pricing": "",
+    "updatedAt": ""
+  },
+  "preferences": {
+    "_comment": "Taste and standing instructions the user gave during runs, one short line each, with the date. Read before every run; add to it in phase 11 whenever the user corrected something.",
+    "items": []
+  },
+  "apps": {
+    "_comment": "Every app shipped with this skill: for duplicate-app checks (4.3), name collisions and reuse.",
+    "items": []
+  }
+}
