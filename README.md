@@ -1,5 +1,8 @@
 # one-shot-app: a Claude Code skill
 
+<!-- demo:start -->
+<!-- demo:end -->
+
 **Pitch an iOS app, tick a few boxes, do the sign-ins, and walk away.** Hours later there's
 a finished, monetized app in App Store Connect, waiting only for you to press "Submit".
 
@@ -77,6 +80,11 @@ It never types your passwords, 2FA codes, tokens or payment details, never buys 
 never starts ads, never spends beyond your cap, and **never submits for App Review**.
 You stay responsible for what you publish: check the generated privacy policy, terms and
 imprint. They're drafts from your own data, not legal advice.
+
+## Record your own run
+
+`assets/demo/` has a time-lapse recorder and an assembler that turns a run into a short
+video and GIF. See [assets/demo/README.md](assets/demo/README.md).
 
 ## Sharing a modified copy
 

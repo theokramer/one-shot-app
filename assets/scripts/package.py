@@ -91,6 +91,8 @@ def scan() -> int:
         except OSError:
             continue
         for v in vals:
+            if rel.name == "LICENSE" and rel.parent == pathlib.Path("."):
+                continue  # the author credit is intentional
             if re.search(r"(?<![\w])" + re.escape(v) + r"(?![\w])", text, re.IGNORECASE):
                 hits.append((str(rel), "your data", v[:3] + "…"))
         for name, rx in PATTERNS.items():
