@@ -12,7 +12,7 @@ from generic UI:
   looks like screen 1.
 - **Commit before coding**: state the chosen font, palette and pattern, then build.
 - **Give the why and the evidence**: the screen's job, the user's state at that moment,
-  and the Mobbin references (links) the decision comes from.
+  and the references (Mobbin/Appllama/web links) the decision comes from. With "No research", say "built-in pattern".
 - **One screen per brief.** Then screenshot it, critique it against written criteria, and
   iterate. Judging the render beats judging the code.
 - **XML tags** separate context, references, constraints and the output contract.
@@ -41,9 +41,9 @@ from generic UI:
 </design_direction>
 ```
 
-Pick the specifics from the app's domain and the Mobbin references, vary them between apps
+Pick the specifics from the app's domain and the references, vary them between apps
 (light vs dark, serif vs grotesk), and record them in `DESIGN.md`. The
-`appllama-app-design-skill` sets the quality bar; this block makes it concrete.
+The chosen design skill (e.g. `appllama-app-design-skill`) sets the quality bar; this block makes it concrete.
 
 ## 2. Screen brief (one per funnel screen)
 
@@ -53,8 +53,8 @@ Pick the specifics from the app's domain and the Mobbin references, vary them be
   <user_state>Just finished the live squat test (form score 81). Motivated, curious, 90 s in.</user_state>
   <must_show>Their goal in their words · a dated outcome · a chart from today to goal · one CTA</must_show>
   <references>
-    <ref app="Flo" url="<mobbin_url>">dated outcome headline above the chart</ref>
-    <ref app="Duolingo" url="<mobbin_url>">progress curve with a marked "you are here"</ref>
+    <ref app="Flo" url="<ref link>">dated outcome headline above the chart</ref>
+    <ref app="Duolingo" url="<ref link>">progress curve with a marked "you are here"</ref>
   </references>
   <direction>Pattern group A ("dated promise + curve"). Do not mix in group B.</direction>
   <design_direction>…paste block 1…</design_direction>
@@ -88,9 +88,21 @@ Pick the specifics from the app's domain and the Mobbin references, vary them be
   page 3, plans: yearly preselected + "Most popular", weekly second; total price large,
           per-week only beside the total; CTA names the trial; Restore · Terms · Privacy
   Legal line updates with the selected plan. Close (×) visible after 2 s, never hidden.
-  Variants for the campaign test: A = this; B = single page with a trial toggle; C = dark.
-  References: <mobbin_urls per page>
+  Variants: as many designs and prices as docs/RUN.md says (paywallVariants × priceTests,
+  ≤ 4 variants), e.g. A = this at $39.99; B = single page + trial toggle at $39.99; C = A at $49.99.
+  References: <ref links per page>
 </paywall_brief>
+```
+
+## 4b. Retention paywall brief
+
+```xml
+<retention_paywall_brief trigger="transaction_abandon | paywall_decline | cancel flow | winback" price="<retentionPrice>/yr">
+  One screen. Headline: a personal reason to stay, from their goal and progress ("Keep your
+  12-day streak"). The price as the hero: "<price> per year", plus the exact renewal terms
+  (every year at <price>, or first year only, then <regular price>). One CTA, plus "No thanks"
+  in plain text. Restore · Terms · Privacy. Shown once per user. Never "only today" or fake timers.
+</retention_paywall_brief>
 ```
 
 ## 5. Screenshot headline brief
@@ -110,7 +122,7 @@ Pick the specifics from the app's domain and the Mobbin references, vary them be
 <preview_storyboard length="25s" locale="en-US">
   0–3 s the win (no logo intro) · 3–8 s how · 8–18 s three features, one caption each ·
   18–23 s the result/progress · 23–25 s end card. Real app only, no onboarding screens.
-  Captions ≤ 5 words, inside the safe area. Music: ACE-Step, <mood>, <bpm>.
+  Captions ≤ 5 words, inside the safe area. Music: per round T (ACE-Step <mood>, <bpm> · silent · own track).
 </preview_storyboard>
 ```
 
@@ -139,8 +151,8 @@ Fix the top findings, re-screenshot, and keep the before/after for the final rep
 ## 8. Briefing a subagent
 
 When research or a critique goes to a subagent: give it the goal, the exact targets, the
-call settings from [mobbin-playbook.md](mobbin-playbook.md), what to return (a table:
-target · app · mobbin_url · decision), and what not to do (no saving, no building). It
+tool rules from [research-sources.md](research-sources.md) (and [mobbin-playbook.md](mobbin-playbook.md) for Mobbin), what to return (a table:
+target · app · reference link · decision), and what not to do (no saving, no building). It
 starts cold, so everything it needs must be in the brief.
 
 Sources: [Anthropic cookbook: prompting for frontend aesthetics](https://platform.claude.com/cookbook/coding-prompting-for-frontend-aesthetics),

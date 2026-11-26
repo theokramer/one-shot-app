@@ -9,9 +9,10 @@ the assets well.
 - Generate **3–4 distinct concepts** and judge them at real home-screen size (60/120/180 px
   contact sheet on light *and* dark wallpaper). One idea, readable at 40 px, no text, no
   thin strokes.
-- With spend allowed: Gemini `gemini-3-pro-image` via the key in `config.json` →
-  `gemini.apiKey` (REST, never print the key). Without spend: a Blender render or a
-  Pillow/vector composition.
+- Made with the round-T image choice ([research-sources.md](research-sources.md#images-and-video)):
+  Gemini or Sunra concepts (within the spend cap; keys from `~/.one-shot-app/config.json`,
+  never printed), a Blender render or vector composition (local), or a typographic/vector
+  icon (no generation).
 - Pick the best concept yourself, write the reasoning into `DECISIONS.md`, and show the
   rest in the final report so the user can swap with one word.
 - Export 1024×1024, **no alpha, no rounded corners**: `sips -g hasAlpha icon.png` → `no`.
@@ -27,7 +28,7 @@ and the [headline brief](prompts.md#5-screenshot-headline-brief). The preview vi
    realistic seeded data. Never AI-drawn UI.
 2. **No AI backgrounds by default.** They clashed with real screens and looked "AI
    generated". Use flat brand colour, the app's own paper tone, or one continuous drawn
-   element. With a spend tick, Gemini may draw an abstract texture, but only if it
+   element. If the image choice and spend allow it, Gemini or Sunra may draw an abstract texture, but only if it
    matches the captures.
 3. **The phone is fully visible or deliberately cropped** (e.g. the top half, cropped at a
    clear line). Never cut off at the bottom edge.
@@ -55,7 +56,7 @@ the translation on every screen.
   before the first tap.
 - Remove dead time with `mpdecimate`, then check a contact sheet (1 fps tiles) for frozen
   pickers or repeated screens before calling it done.
-- Music: **ACE-Step** (`ace-step-song` skill), instrumental, matching the brand mood. Check
+- Music per round T: **ACE-Step** (`ace-step-song` skill, instrumental, brand mood), silent, or the user's own track. Check
   the loudness (`ffmpeg -af ebur128`) and listen to a sample. Never hand-synthesize music.
 - Captions: drawn locally, one short line per scene, inside the safe area.
 
@@ -63,8 +64,8 @@ Specs for the preview video and the review video: [app-store-connect.md](app-sto
 
 ## TikTok/Reels clip (if ticked)
 
-1080×1920, under 30 s, the viral moment in the first second, captions burned in, ACE-Step
-music, end card with the app name. Save to `marketing/`.
+1080×1920, under 30 s, the viral moment in the first second, captions burned in, music
+per round T, end card with the app name. Save to `marketing/`.
 
 ## Store metadata
 

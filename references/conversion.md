@@ -2,7 +2,7 @@
 
 The product isn't the app. It's the funnel: **store page → install → first win →
 onboarding → paywall → day 1 → day 7 → renewal.** Every phase of the run builds one piece
-of it, and every piece is researched on Mobbin first ([mobbin-playbook.md](mobbin-playbook.md))
+of it, and every piece is researched first with the chosen tools ([research-sources.md](research-sources.md); Mobbin: [mobbin-playbook.md](mobbin-playbook.md))
 and briefed with the prompts in [prompts.md](prompts.md).
 
 The numbers below come from vendor data (RevenueCat, Superwall), so treat them as
@@ -45,7 +45,7 @@ Rules:
 
 Structure (adapt the count; each screen has one job):
 
-| # | Screen | Job | Mobbin query (see playbook) |
+| # | Screen | Job | Mobbin query (Appllama / web / none: [research-sources.md](research-sources.md)) |
 |---|---|---|---|
 | 1 | Welcome | promise + proof (a real render or clip), one CTA | "<domain> app welcome screen" |
 | 2–4 | Questionnaire | goal, pain, level/preferences. Self-identification makes the plan personal | "onboarding question with multiple choice" (`search_flows`: "<domain> onboarding questionnaire") |
@@ -59,7 +59,7 @@ Structure (adapt the count; each screen has one job):
 
 Copy rules: outcomes, not features; the user's words from the questionnaire played back;
 no brand jargon; a progress bar; back always allowed except on one-way doors (after
-purchase). The `app-onboarding-questionnaire` skill drafts the question set; Mobbin decides
+purchase). The `app-onboarding-questionnaire` skill drafts the question set (if installed); the research decides
 the patterns.
 
 ## 3. Paywalls that convert (and pass review)
@@ -73,8 +73,11 @@ the patterns.
 - **Trial**: a toggle or a trial-labelled CTA ("Start my 3-day free trial"), reminder
   promise, and a schedule for the reminder notification.
 - **Feature-gate paywalls** (`feature_*`) name the feature tapped in the headline.
-- **Exit offer** (if "Retention & discounts" is ticked): on decline/abandon, a discounted
-  plan once, never more often.
+- **Exit offer** (if "Retention & discounts" is ticked): on decline/abandon, the
+  **retention price** (e.g. $9.99/yr) once per user, never more often.
+- **A/B from day one**: the number of paywall designs and price points comes from the menu
+  (round B2). The variants ship in v1 and the Superwall campaign splits traffic from the
+  first install. Setup: [monetization.md step 4b](monetization.md#step-4b-experiments-from-day-one-and-the-retention-product).
 - **Dark-mode paywall** variant for young audiences; test it via the Superwall campaign
   split, not by guessing.
 - Track paywall views, view→trial, trial→paid and refunds per placement (Superwall +
@@ -92,8 +95,9 @@ Build these into v1 (they're cheap and they compound):
 | Empty states | never empty: a sample plus "do your first …" |
 | Re-entry | deep links from notifications to the exact screen; widgets / Live Activities where natural |
 | Trial users | day-1 "here's what you can do next" nudge; trial-ending reminder (promised on the paywall) |
-| Cancel flow | RC Customer Center: ask why → offer a fix or a promo offer → cancel stays easy |
-| Win-back | ASC win-back offer + Superwall `paywall_winback` for lapsed subscribers |
+| Cancel flow | RC Customer Center: ask why → offer a fix, or the **retention price** → cancel stays easy |
+| Win-back | ASC win-back offer (first year at the retention price) + Superwall `paywall_winback` for lapsed subscribers |
+| Retention price | one very low yearly price (default suggestion $9.99/yr, below the category's cheapest), shown **only** to people leaving: cancel flow, paywall decline, win-back, Apple's cancel sheet. Never on a normal paywall, never twice |
 
 ## 5. The App Store page that converts
 
@@ -103,8 +107,8 @@ Build these into v1 (they're cheap and they compound):
   proof or the habit. Headlines are outcomes, 2–5 words, readable at thumbnail size.
 - **Preview video** (autoplays, muted): the win in the first 3 s, captions carry the story,
   the real app only.
-- Research the category's top pages on Mobbin and Appllama before writing a headline
-  ([mobbin-playbook.md](mobbin-playbook.md#app-store-page)). Make 3 variations (custom
+- Research the category's top store pages with the chosen tools before writing a headline
+  ([research-sources.md](research-sources.md)). Make 3 variations (custom
   product pages now, Product Page Optimization after launch).
 - Description: first 3 lines = promise + what's free/Pro + trial terms.
 - Rate prompt (`SKStoreReviewController` / `expo-store-review`) **only right after a win**
@@ -115,7 +119,7 @@ Build these into v1 (they're cheap and they compound):
 Run the [conversion critique prompt](prompts.md#conversion-critique) against the real
 screenshots of every funnel screen, fix the top findings, and put the before/after in the
 final report. Also report: first win time and taps, onboarding screen count, paywall pages,
-and which Mobbin flows each step was modelled on.
+and which references each step was modelled on.
 
 Sources: [RevenueCat SOSA 2026](https://www.revenuecat.com/state-of-subscription-apps-2026/),
 [RevenueCat benchmarks 2026](https://revenuecat.com/blog/growth/subscription-app-trends-benchmarks-2026),

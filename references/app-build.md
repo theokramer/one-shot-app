@@ -1,7 +1,7 @@
 # Building the app itself
 
 > **Build order: the first win and the habit loop come first, everything else after.**
-> Before writing any screen, run its row of the Mobbin [research matrix](mobbin-playbook.md)
+> Before writing any screen, research it with the chosen tools ([research-sources.md](research-sources.md); with Mobbin, its row of the [research matrix](mobbin-playbook.md))
 > and write its [screen brief](prompts.md#2-screen-brief-one-per-funnel-screen). The
 > retention mechanics in [conversion.md §4](conversion.md#4-retention-day-1-day-7-renewal)
 > (progress memory, a next step on home, notifications tied to the plan, never-empty

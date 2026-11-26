@@ -73,7 +73,7 @@ say so — don't let them find it in TestFlight.
 - **Funnel screenshots**: capture every onboarding + paywall screen in order and run the
   [conversion critique](prompts.md#7-conversion-critique) (a subagent with fresh eyes).
   Fix the top 3 findings per round.
-- **Weakest screen**: `mobbin:redesign-screen` targeted on it, one per round.
+- **Weakest screen**: one per round, improved with the chosen tools: `mobbin:redesign-screen` targeted (Mobbin), `get_screen` similars of its closest reference (Appllama), or the critique alone (web / none).
 - **Day-2 check**: advance the simulator clock or trigger the scheduled notification; the
   deep link lands on the right screen and the home shows a next step.
 

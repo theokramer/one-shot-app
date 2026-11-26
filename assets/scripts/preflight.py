@@ -274,6 +274,38 @@ def check_profile(mods):
                    "profile.py set … && profile.py confirm imprint")
 
 
+def check_tools_choice():
+    """Round-T tools: are the chosen ones installed? (MCP connection itself: ToolSearch in-session.)"""
+    try:
+        td = json.loads(paths.PROFILE.read_text()).get("toolDefaults", {}) if paths.PROFILE.exists() else {}
+    except json.JSONDecodeError:
+        td = {}
+    chosen = set(td.get("research", []) + td.get("design", []) + td.get("images", []) + [td.get("music", "")])
+    if not chosen - {""}:
+        record(INFO, "tools", "not chosen yet (menu round T)")
+        return
+    home = pathlib.Path.home()
+    skills = {d.name for d in (home / ".claude" / "skills").glob("*")}
+    plugins = {d.name for d in (home / ".claude" / "plugins" / "cache").glob("*/*")}
+    checks = {
+        "Mobbin MCP": ("mobbin" in plugins, "Install the Mobbin plugin and authorize it via /mcp, or drop it in round T"),
+        "Appllama MCP": ("appllama-usage" in skills, "Add the Appllama MCP + appllama-usage skill and authorize via /mcp, or drop it"),
+        "appllama-app-design-skill": ("appllama-app-design-skill" in skills, "Install appllama-app-design-skill, or pick 'Built-in rules only'"),
+        "frontend-design": ("frontend-design" in skills, "Install the frontend-design skill, or drop it"),
+        "Sunra": (bool(shutil.which("sunra")), "Install the sunra CLI and run `sunra login`, or drop it"),
+        "Local only": (pathlib.Path("/Applications/Blender.app").exists() or bool(shutil.which("blender")),
+                       "Optional: install Blender for 3D renders (Pillow/ffmpeg still work without it)"),
+        "ACE-Step (local)": ("ace-step-song" in skills, "Install an ace-step-song skill + ACE-Step, or pick 'Silent'"),
+    }
+    for name in sorted(chosen - {""}):
+        if name in checks:
+            ok, fix = checks[name]
+            state = OK if ok else (WARN if name == "Local only" else FAIL)
+            record(state, f"tool {name}", "installed" if ok else "not found", "install", "" if ok else fix)
+        elif name == "Gemini API":
+            check_gemini(json.loads(paths.CONFIG.read_text()) if paths.CONFIG.exists() else None)
+
+
 def check_chrome(mods):
     sites = []
     if "meta" in mods:
@@ -352,6 +384,7 @@ def main():
         if name in mods:
             fn()
     check_profile(mods)
+    check_tools_choice()
     check_chrome(mods)
     raise SystemExit(report())
 

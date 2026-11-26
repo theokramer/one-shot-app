@@ -84,7 +84,24 @@ def detect():
     git_email = run(["git", "config", "--global", "user.email"])
     git_name = run(["git", "config", "--global", "user.name"])
     dirs = [d for d in ("~/Documents", "~/Developer", "~/Projects", "~/code") if pathlib.Path(d).expanduser().is_dir()]
+    home = pathlib.Path.home()
+    skill_names = {d.name for d in (home / ".claude" / "skills").glob("*") if d.is_dir() or d.is_symlink()}
+    plugin_names = {d.name for d in (home / ".claude" / "plugins" / "cache").glob("*/*") if d.is_dir()}
+    known = {"mobbin": "mobbin" in plugin_names, "appllama-usage": "appllama-usage" in skill_names,
+             "appllama-app-design-skill": "appllama-app-design-skill" in skill_names,
+             "frontend-design": "frontend-design" in skill_names, "ace-step-song": "ace-step-song" in skill_names,
+             "app-onboarding-questionnaire": "app-onboarding-questionnaire" in skill_names,
+             "superwall skills": any(n.startswith("superwall") for n in skill_names),
+             "revenuecat plugin": "revenuecat" in plugin_names, "sunra": bool(shutil.which("sunra")),
+             "blender": pathlib.Path("/Applications/Blender.app").exists() or bool(shutil.which("blender"))}
+    try:
+        gem = bool(dig(json.loads(paths.CONFIG.read_text()), "gemini.apiKey")) if paths.CONFIG.exists() else False
+    except json.JSONDecodeError:
+        gem = False
+    known["gemini key"] = gem
     out = {
+        "plugins": known,
+        "note": "MCP connections (Mobbin, Appllama) are checked with ToolSearch; installed is not the same as connected.",
         "githubLogin": gh, "githubOrgs": orgs,
         "bundlePrefixSuggestions": [f"com.{gh.lower()}"] + [f"com.{o.lower()}" for o in orgs[:2]] if gh else [],
         "gitName": git_name, "gitEmail": git_email,

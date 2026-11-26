@@ -51,7 +51,11 @@
     "runStyle": "",
     "spendCap": "",
     "pricing": "",
-    "updatedAt": ""
+    "updatedAt": "",
+    "paywallVariants": "",
+    "priceTests": "",
+    "retentionPrice": "",
+    "retentionForm": ""
   },
   "preferences": {
     "_comment": "Taste and standing instructions the user gave during runs, one short line each, with the date. Read before every run; add to it in phase 11 whenever the user corrected something.",
@@ -60,5 +64,13 @@
   "apps": {
     "_comment": "Every app shipped with this skill: for duplicate-app checks (4.3), name collisions and reuse.",
     "items": []
+  },
+  "toolDefaults": {
+    "_comment": "Round T answers: which research, design, image and music tools this user wants. Later runs ask only 'keep or change'.",
+    "research": [],
+    "design": [],
+    "images": [],
+    "music": "",
+    "updatedAt": ""
   }
 }

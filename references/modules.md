@@ -49,7 +49,7 @@ list.
 |---|---|
 | Tool | `superwall` CLI v2.7+: `bootstrap`, `apps`, `products`, `entitlements`, `campaigns … placements`, and **paywall-as-code** (`superwall create` → `superwall/` dir, `npx superwall@latest publish -m "…" --no-interactive`). The old "paywalls can't be authored from the CLI" wall is gone. |
 | Login | `superwall login` |
-| Skills | `superwall-integrate`, `superwall-placements`, `superwall-dashboard`, `app-onboarding-questionnaire`, `mobbin:search` |
+| Skills | `superwall-integrate`, `superwall-placements`, `superwall-dashboard`, `app-onboarding-questionnaire`; research per round T ([research-sources.md](research-sources.md)) |
 | Tick | Create & connect accounts |
 | Ref | [onboarding-paywalls.md](onboarding-paywalls.md) |
 
@@ -67,6 +67,7 @@ that: a reminder screen before anyone has started a trial makes no sense.
 | Win-back offers | ASC API `winBackOffers` (asc.py): eligibility (paid ≥ N months, lapsed ≥ N days), discount, period, priority. Shown by Apple on the store and in-app via StoreKit 2 / RC `getEligibleWinBackOffers`. |
 | Promotional offers | Needs the **subscription offer key** (ASC → Users and Access → Integrations → In-App Purchase key, which `rc setup apple` already created and RC holds). Create offers with asc.py `subscriptionPromotionalOffers`. Used by the cancel flow and the exit paywall. |
 | Offer codes | asc.py `subscriptionOfferCodes` + one-time or custom codes (e.g. `LAUNCH30`). Codes go into `store/OFFER_CODES.md`, never into the repo history. |
+| Retention price | The menu's round B2 sets it (e.g. **$9.99/yr**) and its form: its own `.yearly.retention` product renewing at that price, or "first year only" as a promo/win-back offer on the normal yearly. Shown only on the surfaces below. Setup: [monetization.md step 4b](monetization.md#step-4b-experiments-from-day-one-and-the-retention-product) |
 | Cancel flow | RevenueCat **Customer Center** (`revenuecat:revenuecat-customer-center` skill) with a promotional-offer "before you go" path. Superwall `transaction_abandon` / `paywall_decline` placements show an exit-offer paywall. |
 | Retention Messaging API | Apple's server API (preview) that shows a retention message on the cancel sheet. Needs a server endpoint (Cloudflare Worker) plus enrollment. If ASC doesn't offer it to this account yet, write the endpoint stub and put "enable when available" in `POST_LAUNCH.md`, so the run doesn't fail. |
 | Ref | [app-store-connect.md](app-store-connect.md#offers-and-retention) |
@@ -129,5 +130,5 @@ none.
 ## TikTok/Reels clip
 
 Recorded from the simulator (`simctl io recordVideo`), cut with ffmpeg, captions drawn
-locally, music from **ACE-Step** (`ace-step-song` skill, per the user's global rule), 9:16,
+locally, music per the round-T choice (ACE-Step, silent or own track), 9:16,
 under 30 s, the viral moment in the first second.

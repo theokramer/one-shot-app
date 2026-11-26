@@ -83,10 +83,12 @@ Reply with three or four lines on what you took from it, plus **the one viral fe
 you'd build (one TikTok-able moment, e.g. "shake your phone for a new room style", or a
 scored clip of your squat form). That's how a misread gets caught early.
 
-The user's standing design brief applies to every app, so don't ask about it again: research
-real apps on **Mobbin** (`mobbin:search`) before drawing UI, follow
-**`appllama-app-design-skill`**, choose one cohesive direction yourself, avoid generic
-AI-looking UI, and never ask about colours, fonts or layouts.
+The standing design brief applies to every app, so don't ask about it again: research real
+apps with the **chosen research sources** ([research-sources.md](research-sources.md)) before
+drawing UI, follow the **chosen design skills**, choose one cohesive direction yourself, avoid
+generic AI-looking UI, and never ask about colours, fonts or layouts. If the reference is an
+app and Appllama is chosen, pull its screens and prices with `get_app` / `list_app_screens`;
+with Mobbin, search its flows by name; with web only, read its App Store listing.
 
 ---
 
@@ -115,6 +117,55 @@ utility nobody will advertise.
 
 Read [modules.md](modules.md) first. It says what each option costs in tools, sign-ins and
 permissions, which you need in order to recommend honestly.
+
+### Round T: tools and plugins (first run, then "keep or change")
+
+The skill works with **any** combination of research and generation tools, including none.
+Every step has an equivalent per tool ([research-sources.md](research-sources.md)).
+
+- **First run** (no `toolDefaults` in the library): ask the card below, pre-ticking only what
+  is actually installed or connected. Check that with `setup.py detect` (installed skills
+  and plugins, CLIs, keys) and `ToolSearch` for the MCP tools (`mobbin`, `appllama`).
+- **Later runs**: one question, "Keep your tools: Mobbin + Appllama, Gemini, ACE-Step?" with
+  the options "Keep" · "Change". Only "Change" shows the full card.
+- A chosen tool that isn't connected (an MCP needing `/mcp` auth, a missing skill) goes
+  into phase 4's fix list, with the option to drop it instead. It never fails silently.
+
+```jsonc
+[
+  { "header": "Research", "multiSelect": true,
+    "question": "Which design research sources should the run use for onboarding, paywalls, screens and the store page?",
+    "options": [
+      { "label": "Mobbin MCP", "description": "Pattern library across many apps: one screen or flow per search, redesign boards, collections." },
+      { "label": "Appllama MCP", "description": "Top-grossing apps' full journeys in order, with revenue and in-app prices. Uses credits (1 per call)." },
+      { "label": "Web research only", "description": "Free: App Store listings (screenshots, subtitles, prices), apps' websites, Apple's HIG via web fetch." },
+      { "label": "No research", "description": "Only the skill's built-in conversion playbook and design rules. Fastest, least specific." } ] },
+  { "header": "Design", "multiSelect": true,
+    "question": "Which design guidance skills should shape the UI?",
+    "options": [
+      { "label": "appllama-app-design-skill", "description": "Native iOS fidelity, motion and polish rules, with a simulator verification loop." },
+      { "label": "frontend-design", "description": "Distinctive aesthetic direction; also used for the website." },
+      { "label": "Built-in rules only", "description": "The skill's own design-direction brief and avoid-list (prompts.md)." } ] },
+  { "header": "Images", "multiSelect": true,
+    "question": "What may create images and video (icon, renders, clips)? Spend still follows the cap.",
+    "options": [
+      { "label": "Gemini API", "description": "Icon concepts, textures, short AI video clips, translations. Needs a key; costs within the cap." },
+      { "label": "Sunra", "description": "The `sunra` CLI with your Sunra credits." },
+      { "label": "Local only", "description": "Blender renders (CC0 assets), Pillow, ffmpeg. $0." },
+      { "label": "No generation", "description": "Only real app captures and vector/typographic art." } ] },
+  { "header": "Music", "multiSelect": false,
+    "question": "Music for the preview video and the TikTok clip?",
+    "options": [
+      { "label": "ACE-Step (local)", "description": "Generated locally with the ace-step-song skill. $0." },
+      { "label": "Silent", "description": "No music; captions carry the video." },
+      { "label": "My own track", "description": "You give a licensed audio file path once; it's saved in the library." } ] }
+]
+```
+
+"No research" excludes the other research options, and "No generation" excludes the other
+image options. If both kinds are ticked, take the "no" choice and say so. Save the answers
+as `toolDefaults` with `profile.py save-tools '{…}'`. Every later phase reads
+`docs/RUN.md` → tools and uses only those.
 
 ### Round A: what to build
 
@@ -162,7 +213,7 @@ upload and attach. These options are the extras:
     "question": "Which store visuals should I make and upload?",
     "options": [
       { "label": "Screenshot variations", "description": "3+ distinct, connected sets from real captures, all required sizes; you pick one as the default in the final report." },
-      { "label": "App preview video", "description": "15–30 s, the real app (not onboarding), brisk with captions per scene and ACE-Step music; one per language." },
+      { "label": "App preview video", "description": "15–30 s, the real app (not onboarding), brisk with captions per scene and music from your music choice; one per language." },
       { "label": "Header + search art", "description": "Asset Library header (3840×1646) and search-results art (3840×2560). Browser-only upload." },
       { "label": "Custom product pages", "description": "Every screenshot variation as its own product page, for ads and for an A/B test once the app is live." } ] },
   { "header": "Offers", "multiSelect": true,
@@ -192,6 +243,50 @@ Tick nothing in Languages → English only. "Other" takes any further languages 
 paywall messages + website pages + store metadata + screenshots + preview video, and a
 simulator pass in that locale. Save the choice as `menuDefaults.languages`.
 
+### Round B2: experiments and the retention price
+
+Ask this round whenever "Superwall onboarding + paywall" or "Retention & discounts" is
+ticked. The A/B tests run **from the first public build**, so they have to be decided now:
+every tested price is its own App Store product, and all of them go to review with v1.
+
+```jsonc
+[
+  { "header": "Paywalls", "multiSelect": false,
+    "question": "How many different onboarding paywall designs should be A/B tested from launch?",
+    "options": [
+      { "label": "2 designs (A/B)", "description": "e.g. multi-page with trial timeline vs single page with a trial toggle. 50/50 split. Readable soonest." },
+      { "label": "3 designs (A/B/C)", "description": "Adds a third direction (e.g. dark). 34/33/33. Needs more installs before it's readable." },
+      { "label": "1 design, no test", "description": "One paywall; the variants are built but switched off, ready to start later." } ] },
+  { "header": "Prices", "multiSelect": false,
+    "question": "How many yearly price points should be tested from launch?",
+    "options": [
+      { "label": "2 prices", "description": "e.g. $39.99 vs $49.99/yr, each its own product. Combined with the paywall designs into one campaign split." },
+      { "label": "3 prices", "description": "e.g. $29.99 / $39.99 / $49.99. Best with ad traffic; slower to read on organic installs alone." },
+      { "label": "1 price, no test", "description": "Only the default price ships; more price products can be added in a later version." } ] },
+  { "header": "Retention", "multiSelect": false,
+    "question": "Which retention price should be offered to people who are about to leave?",
+    "options": [
+      { "label": "$9.99 / year", "description": "Far below what competitors charge. Shown only when someone cancels, declines the paywall, or has lapsed. Never on the normal paywall." },
+      { "label": "$14.99 / year", "description": "Still a steep discount, with more revenue per saved user." },
+      { "label": "$19.99 / year", "description": "About half the default price." },
+      { "label": "No retention price", "description": "The cancel flow just asks why; no discount." } ] },
+  { "header": "Retention form", "multiSelect": false,
+    "question": "How should the retention price work?",
+    "options": [
+      { "label": "That price, every year", "description": "Its own yearly product at that price, renewing at that price. The strongest 'nobody beats this' offer." },
+      { "label": "First year only", "description": "A promotional or win-back offer on the normal yearly plan: the first year at that price, then the regular price. Works on Apple's cancel sheet too." } ] }
+]
+```
+
+If the user typed a custom amount under "Other", use it. Pick the nearest Apple price point
+(`superwall asc prices points`) and say which one you used in `docs/DECISIONS.md`. Before
+locking the retention price, look up the category's cheapest yearly prices (the competitors'
+App Store listings, "In-App Purchases" section, via WebFetch or Appllama). If the chosen
+price isn't below all of them, note that in `DECISIONS.md`, and keep the user's choice anyway.
+
+Save the answers to `menuDefaults` as `paywallVariants`, `priceTests`, `retentionPrice`
+and `retentionForm`.
+
 ### Round C: permissions and money
 
 Before calling it, say in one line what is **never** done, whatever is ticked:
@@ -220,7 +315,8 @@ Before calling it, say in one line what is **never** done, whatever is ticked:
 ]
 ```
 
-Write the answers to `docs/RUN.md` (modules, depth, languages, run style, permissions, cap)
+Write the answers to `docs/RUN.md` (modules, depth, languages, run style, experiments,
+retention price, permissions, cap)
 straight away. Every later phase reads it, and the final report quotes it back. Save the
 menu answers (not the permissions, which are per run) to the library:
 `profile.py save-menu '{"money": [...], "backend": [...], ...}'`.
@@ -253,7 +349,7 @@ card first**, with options pre-filled from the library and the context:
 | VAT ID | "None (small business, § 19 UStG)" · "I have one" (then typed) |
 | App Review phone | the saved number · "Same as imprint" |
 | Country | "Deutschland" · "Österreich" · "Schweiz" |
-| Mobbin collections | "Yes, save each app's references to a private collection" · "No" |
+| Mobbin collections (only if Mobbin is a chosen tool) | "Yes, save each app's references to a private collection" · "No" |
 
 Only what's left (street, postcode, city, and names nobody could guess) goes into one
 plain chat message, for example:
@@ -302,9 +398,9 @@ Create the project directory, `git init`, and write:
   vs Pro table (the paywall's contract), permissions with exact usage strings, explicitly
   out of scope.
 - `docs/DESIGN.md`: the `<design_direction>` block ([prompts.md](prompts.md#1-design_direction-written-once-into-designmd-pasted-into-every-screen-brief)),
-  palette tokens, type scale, shape and motion, components, and "Patterns" with the Mobbin
+  palette tokens, type scale, shape and motion, components, and "Patterns" with the research
   references each decision comes from. Run the onboarding-flow and paywall rows of the
-  [research matrix](mobbin-playbook.md#the-research-matrix-phase-57) **before** writing it,
+  research for the onboarding flow and the paywall ([research-sources.md](research-sources.md)) **before** writing it,
   so the plan already says which flows the funnel is modelled on.
 - In `docs/SPEC.md`, also: **the first win** (one sentence), the time-to-first-win budget,
   and the retention loop ([conversion.md](conversion.md#1-fast-wins-designing-the-first-60-seconds)).
@@ -321,6 +417,7 @@ Viral moment: <the feature>
 Stack: Expo · RevenueCat + Superwall · Cloudflare · Meta + TikTok · EN/DE
 Free vs Pro: <one line>
 Store: full basics + 3 screenshot sets, preview video EN/DE, review video, win-back
+Tests: 2 paywall designs × 2 yearly prices (4 variants) · Retention: $9.99/yr, every year
 Unattended: everything below except ↓
 Your to-do at the end (known now): App Privacy "Publish" click if Apple asks for re-auth · Submit for review
 Spend: ~$3 of your $20 cap · Time: ~4–6 h

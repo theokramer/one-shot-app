@@ -9,6 +9,7 @@
     profile.py add-pref "Store art: phones fully visible, never cut at the bottom"
     profile.py add-app name=MyApp bundle=com.example.myapp stack=expo dir="~/Documents/MyApp" category="habit tracker"
     profile.py save-menu '{"money":["RevenueCat subscriptions"], ...}'
+    profile.py save-tools '{"research":["Mobbin MCP"],"design":[...],"images":[...],"music":"Silent"}'
     profile.py imprint-html --lang de|en         # the imprint page body, for site/gen.py
     profile.py summary                           # short, non-sensitive overview for the intake
 
@@ -160,6 +161,9 @@ def summary():
     print(f"accounts      meta ad {have('accounts.metaAdAccountId')}  tiktok {have('accounts.tiktokAdvertiserId')}")
     md = p.get("menuDefaults", {})
     print(f"last menu     {md.get('updatedAt') or 'none'}")
+    td = p.get("toolDefaults", {})
+    tools = [x for k in ("research", "design", "images") for x in td.get(k, [])] + ([td["music"]] if td.get("music") else [])
+    print(f"tools         {', '.join(tools) if tools else 'not chosen yet (ask round T)'}")
     print(f"preferences   {len(p.get('preferences', {}).get('items', []))} saved")
     print(f"apps          {', '.join(a.get('name', '?') for a in p.get('apps', {}).get('items', [])) or 'none'}")
 
@@ -217,6 +221,13 @@ def main():
         p.setdefault("menuDefaults", {}).update(md)
         save(p)
         print("saved menu defaults")
+    elif cmd == "save-tools":
+        p = load()
+        td = json.loads(a[0])
+        td["updatedAt"] = today()
+        p.setdefault("toolDefaults", {}).update(td)
+        save(p)
+        print("saved tool defaults")
     elif cmd == "imprint-html":
         lang = a[a.index("--lang") + 1] if "--lang" in a else "de"
         print(imprint_html(lang))

@@ -54,7 +54,7 @@ reply. Upload via `fastlane deliver` or asc.py `appScreenshotSets`.
 
 ### App preview video
 - 886×1920 (or 1080×1920) H.264, 30 fps, **15–30 s** (Apple's limit), AAC audio track
-  (silent is fine, ACE-Step music is better).
+  (silent is fine; music per the round-T choice).
 - **The real app, not the onboarding.** Brisk but readable: 2–3 s per scene, a short
   caption per scene, no long wait at the start, the viral moment in the first 3 s, and an
   end card.
@@ -92,10 +92,12 @@ reply. Upload via `fastlane deliver` or asc.py `appScreenshotSets`.
 
 | Offer | API | Notes |
 |---|---|---|
-| Intro offer / free trial | `superwall asc offers create` | on yearly; all territories; the paywall reads eligibility |
+| Intro offer / free trial | `superwall asc offers create` | on the default and tested yearly products (not the retention product); all territories; the paywall reads eligibility |
+| Price-test products | `superwall asc subscriptions create` per price, same group | `.yearly.b`, `.yearly.c`; all go to review with v1 ([monetization.md step 4b](monetization.md#step-4b-experiments-from-day-one-and-the-retention-product)) |
+| Retention product | `superwall asc subscriptions create` | `.yearly.retention` at the chosen price (e.g. $9.99), lowest group level, no trial; shown only on retention surfaces |
 | Promotional offers | asc.py `POST /v1/subscriptionPromotionalOffers` | signed with the In-App Purchase key that RevenueCat holds; used in the cancel flow and the exit paywall |
 | Offer codes | asc.py `POST /v1/subscriptionOfferCodes` → `subscriptionOfferCodeCustomCodes` or `…OneTimeUseCodes` | write codes to `store/OFFER_CODES.md` (git-ignored) |
-| Win-back offers | asc.py `POST /v1/winBackOffers` | eligibility: paid duration, time since lapse, wait between offers; priority HIGH for the best one |
+| Win-back offers | asc.py `POST /v1/winBackOffers` | eligibility: paid duration, time since lapse, wait between offers; priority HIGH for the best one. Default offer: first year at the retention price |
 | Retention Messaging | Apple's Retention Messaging API (preview) + a Worker endpoint | if the account doesn't have access, write the endpoint and a `POST_LAUNCH.md` step; don't fail the run |
 | In-app cancel flow | RC Customer Center with a promo offer | `revenuecat:revenuecat-customer-center` |
 | Exit offer | Superwall placement on `transaction_abandon` → discounted paywall | product = the promotional offer or a cheaper SKU |

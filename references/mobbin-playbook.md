@@ -1,13 +1,14 @@
 # Mobbin playbook: research every funnel screen before building it
 
-Mobbin is the main design input for this skill. Use it **heavily**, but in the way it works
+Used when **Mobbin** is a chosen research tool in menu round T (other tools:
+[research-sources.md](research-sources.md)). Then use it **heavily**, but in the way it works
 best: Mobbin answers **one screen, flow or section per query**. "Design my whole app" is too
 broad for it, so the skill breaks the app into a research matrix and runs it.
 
 Before the first search in a run: invoke `mobbin:best-practices`, then `mobbin:search`
 (their rules win wherever they differ from this file). If the Mobbin tools aren't in the
-session or a call is refused, say so in one line, and fall back to Appllama
-(`appllama-usage`) for screens. Never design "from memory of Mobbin".
+session or a call is refused, say so in one line, and fall back to the other
+chosen sources (or web research) per [research-sources.md](research-sources.md). Never design "from memory of Mobbin".
 
 ## Call settings (same for the whole run)
 

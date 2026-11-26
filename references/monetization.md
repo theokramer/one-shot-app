@@ -116,7 +116,7 @@ superwall campaigns ... # put the published paywall on the campaign that carries
 ```
 
 The `superwall-framework` skill (installed by `superwall login`) and
-`superwall-editor` cover the layout system. Design it from Mobbin paywall research. It must
+`superwall-editor` cover the layout system. Design it from the paywall research (chosen tools, [research-sources.md](research-sources.md)). It must
 show price, period, trial terms, auto-renew text, Restore, Terms and Privacy, and the legal
 line has to **follow the selected plan**.
 
@@ -129,6 +129,59 @@ If Superwall hasn't presented within 4 s, or it skips or errors, the native payw
 If the native one is already up when Superwall arrives late, Superwall's is dismissed. Without
 this fallback, a campaign with no paywall assigned lets **every gate fall open** and free
 equals Pro.
+
+## Step 4b: Experiments from day one, and the retention product
+
+Read `paywallVariants`, `priceTests`, `retentionPrice` and `retentionForm` from `docs/RUN.md`.
+
+**Why every price is its own product:** one App Store product has one price per
+storefront. A price test therefore means several products in the **same subscription
+group**, so users can switch between them and RevenueCat sees one subscription. Never use
+a different group for a tested price.
+
+| Product | Example id | Price | Shown where | Group level |
+|---|---|---|---|---|
+| Default yearly | `<bundle>.pro.yearly` | default (e.g. $39.99) | every paywall, variant A | 1 (highest) |
+| Test yearly B / C | `<bundle>.pro.yearly.b`, `.c` | e.g. $49.99 / $29.99 | price-test variants only | same level as default |
+| Weekly | `<bundle>.pro.weekly` | e.g. $6.99 | all paywalls | 1 |
+| Retention yearly ("that price, every year") | `<bundle>.pro.yearly.retention` | e.g. $9.99 | retention surfaces only | lowest level |
+
+Set it up in all three systems:
+
+1. **App Store Connect**: create every product in the group, with a price, localizations,
+   the review screenshot and the same trial (the retention product has **no trial**). All
+   products are submitted with v1. Products added later need a new version.
+2. **RevenueCat**: attach **every** product to the `pro` entitlement, so a buyer of any
+   variant is Pro. Offerings: `default` (A), `price_b`, `price_c`, and `retention` (the
+   retention product, or the yearly with the offer). Superwall picks the products;
+   RevenueCat only has to recognise them.
+3. **Superwall**: one paywall per design × price, all published from `superwall/`. One
+   campaign on `onboarding_paywall` (and `paywall_generic`) with the variants split evenly
+   (2 → 50/50, 3 → 34/33/33; paywall designs × prices → the cross product, capped at 4
+   variants, so drop the weakest combinations first). **No holdout.** Feature-gate
+   placements show the variant the user was already assigned, so people don't see two prices.
+4. **Retention surfaces** (only these ever show the retention price):
+   - Superwall `transaction_abandon` and `paywall_decline` → the retention paywall, **once
+     per user** (a Superwall audience filter on a user attribute `retention_offer_seen`)
+   - RevenueCat Customer Center cancel flow → "Before you go" with the retention offer
+   - Win-back (lapsed subscribers): an ASC win-back offer on the default yearly, at the
+     retention price for the first year, plus Superwall `paywall_winback`
+   - Apple's cancel sheet via Retention Messaging (where available): the promotional offer
+5. **"First year only" form**: no extra product. Create a **promotional offer** (pay up
+   front, 1 year, at the retention price) on the default yearly, and the same as a
+   **win-back offer**. The cancel flow and the exit paywall redeem the promo offer through
+   RevenueCat (`Purchases.getPromotionalOffer` / `purchase(package:promotionalOffer:)`).
+6. Never use a dark pattern. The retention paywall says the price, the period and that it
+   renews (at that price, or at the regular price after the first year), with Restore,
+   Terms and Privacy like every paywall.
+
+Name products and paywalls so the analytics read themselves (`yearly.b`,
+`pw_multi_49`, `pw_single_39`). Write the experiment table (variant · design · products ·
+split · placement) into `docs/EXPERIMENTS.md`, and the readout plan into `POST_LAUNCH.md`:
+the primary metric is **trial→paid revenue per paywall view** (Superwall's results plus
+RevenueCat charts), checked once each variant has ~100 trials. Don't run RevenueCat
+Experiments on the same users at the same time, because two systems splitting the same
+traffic make both readings useless.
 
 ## Step 5 — Wire the app
 

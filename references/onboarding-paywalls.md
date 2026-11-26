@@ -3,11 +3,11 @@
 ## What a high-converting onboarding looked like in practice
 
 The full structure, paywall pages and copy rules are in [conversion.md](conversion.md) §2–3,
-the research queries in [mobbin-playbook.md](mobbin-playbook.md), and the briefs in
+the research per tool in [research-sources.md](research-sources.md), and the briefs in
 [prompts.md](prompts.md). Onboarding paywalls are **multi-page** (value → trial timeline →
 plans), and the campaign ships with variants A/B(/C) ready to test.
 
-Research first: `mobbin:search` (flows: "onboarding questionnaire", "paywall", "permission
+Research first with the chosen tools. With Mobbin: `mobbin:search` (flows: "onboarding questionnaire", "paywall", "permission
 priming" in the same category as the app) and the `app-onboarding-questionnaire` skill.
 Then the shape that worked in shipped apps:
 

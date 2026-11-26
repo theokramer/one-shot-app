@@ -50,7 +50,7 @@ put that item on the final to-do list. A run that stops at hour two because it n
 | 3 | Follow-up questions: name, stack, pricing, free vs Pro | ⏸ | [intake.md](references/intake.md) |
 | 4 | **Connect**: install, log in, prove every credential, do all Chrome work that needs the user | ⏸ **hard gate** | [connect.md](references/connect.md) |
 | 5 | Plan: `docs/PLAN.md` and a short summary, one approval | ⏸ **last question** | [intake.md](references/intake.md) |
-| 6 | Mobbin research matrix, then scaffold + build the app (first win + retention loop first), then an autonomous QA loop | ▶ | [mobbin-playbook.md](references/mobbin-playbook.md) · [prompts.md](references/prompts.md) · [scaffold.md](references/scaffold.md) (SwiftUI) · [expo.md](references/expo.md) (Expo) · [app-build.md](references/app-build.md) · [demo.md](references/demo.md) |
+| 6 | Research matrix (with the chosen research tools), then scaffold + build the app (first win + retention loop first), then an autonomous QA loop | ▶ | [research-sources.md](references/research-sources.md) · [mobbin-playbook.md](references/mobbin-playbook.md) · [prompts.md](references/prompts.md) · [scaffold.md](references/scaffold.md) (SwiftUI) · [expo.md](references/expo.md) (Expo) · [app-build.md](references/app-build.md) · [demo.md](references/demo.md) |
 | 7 | Monetization + high-converting onboarding + multi-page paywalls (if ticked) | ▶ | [conversion.md](references/conversion.md) · [monetization.md](references/monetization.md) · [onboarding-paywalls.md](references/onboarding-paywalls.md) |
 | 8 | Backend · ads attribution · localization (if ticked) | ▶ | [backend.md](references/backend.md) · [ads-attribution.md](references/ads-attribution.md) |
 | 9 | Store assets (conversion-ordered) + App Store Connect to the chosen depth + website | ▶ | [conversion.md](references/conversion.md#5-the-app-store-page-that-converts) · [launch-assets.md](references/launch-assets.md) · [app-store-connect.md](references/app-store-connect.md) |
@@ -70,11 +70,17 @@ Before "Go", check that each of those sites is actually signed in.
 
 **2. CLI and MCP first, Chrome last.** Order of preference: the project's CLI (`rc`,
 `superwall`, `superwall asc`, `wrangler`, `gh`, `fastlane`, `xcrun`), then the App Store
-Connect API (`assets/scripts/asc.py`), then an MCP server (Mobbin, Supabase), then Claude in
+Connect API (`assets/scripts/asc.py`), then an MCP server (Mobbin, Appllama, Supabase), then Claude in
 Chrome. Only use Chrome when there is no API: App Privacy, Asset Library
 header/search art, compliance forms, Meta/TikTok dashboards, Resolution Center. When a tool
 is missing, say exactly what to install (phase 4 prints it). Don't silently fall back to
 Chrome.
+
+**2b. Any tools, or none.** Research (Mobbin, Appllama, web, none), design skills, image
+and video generation (Gemini, Sunra, local, none) and music (ACE-Step, silent, own track) are
+picked in menu round T and saved in the library. Every step has an equivalent for each
+choice ([research-sources.md](references/research-sources.md)). Never assume a plugin is
+there, and never fail because one isn't.
 
 **3. Permission is asked once, up front, item by item.** The menu has a permissions
 question. What the user ticks there is the standing approval for this run, and nothing
@@ -105,7 +111,9 @@ phase 11. Each run should need fewer clicks than the last.
 
 **8. Conversion is the product.** The funnel (store page → first win → onboarding →
 paywall → day 1/day 7) gets more care than any feature. Every funnel screen is researched
-on Mobbin first ([mobbin-playbook.md](references/mobbin-playbook.md)), briefed with a
+with the research tools picked in menu round T
+([research-sources.md](references/research-sources.md); Mobbin specifics in
+[mobbin-playbook.md](references/mobbin-playbook.md)), briefed with a
 written brief ([prompts.md](references/prompts.md)), built, screenshotted, critiqued and
 improved. The rules and benchmarks are in [conversion.md](references/conversion.md). The
 first win is reached in **≤ 60 s and ≤ 8 taps, inside onboarding**, and QA measures it.
@@ -123,6 +131,9 @@ final message asks once.
 - **Every placement has a native fallback.** If Superwall hasn't presented within 4 s
   (offline, no campaign, error), show the native onboarding or paywall. Without the paywall
   fallback, free equals Pro.
+- **Experiments ship in v1**: every tested price is its own product in the same
+  subscription group, all attached to `pro`. The **retention price** (e.g. $9.99/yr) only
+  ever appears to people who are leaving (cancel, decline, lapsed), and once per user.
 - **Attach products to the entitlement.** Otherwise a purchase completes and Pro stays off.
 - **No secrets in the binary.** Only public SDK keys go in the app. Provider keys live in
   Cloudflare/Supabase secrets or GitHub secrets. The `.p8` and `config.json` are never

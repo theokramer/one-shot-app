@@ -39,9 +39,11 @@ Every app also gets support, privacy, terms and imprint (Impressum) pages, hoste
   Manager access)
 - Free accounts and CLIs: GitHub (`gh`), RevenueCat (`rc`), Superwall (`superwall`), and
   optionally Cloudflare (`wrangler`), Supabase, a Gemini API key, and Meta/TikTok ad accounts
-- Recommended companions: the **Mobbin MCP** (design research; heavily used), the
-  Superwall and RevenueCat skills/plugins, `appllama-app-design-skill`, and an
-  `ace-step-song` skill for music in videos
+- **Plugins are your choice, none required**: on first run you pick your design research
+  (Mobbin MCP, Appllama MCP, plain web research, or none), design skills
+  (`appllama-app-design-skill`, `frontend-design`, or the built-in rules), image/video
+  generation (Gemini API, Sunra, local Blender/Pillow, or none) and music (ACE-Step, silent,
+  or your own track). Every step works with any combination.
 
 You don't need to set these up in advance. The first run checks everything and prints the
 exact install and login commands for the modules you picked.

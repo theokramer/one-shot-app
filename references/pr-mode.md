@@ -16,8 +16,8 @@ One message, and nothing in it is a surprise:
    the exact link or command. Mark which ones are needed before submitting and which on
    launch day (`store/POST_LAUNCH.md`).
 6. **Spend**: what was spent vs the cap.
-6b. **Funnel**: first win time and taps, onboarding/paywall screen counts, the Mobbin
-   flows it was modelled on (links), the critique's before/after, and the paywall variants
+6b. **Funnel**: first win time and taps, onboarding/paywall screen counts, the references
+   it was modelled on (links, or "built-in playbook" with no research), the critique's before/after, and the paywall variants
    ready to A/B.
 7. One question: **"Submit for review?"** (it's the user's click, or explicit go-ahead.)
 

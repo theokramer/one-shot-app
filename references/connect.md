@@ -40,8 +40,9 @@ as a single block, for example:
 - **Logins** (`gh auth login`, `superwall login`, `rc auth login`, `npx wrangler login`,
   `supabase login`): the user runs these. They open a browser or ask for a code.
 - **MCP servers that need auth** (Mobbin, Supabase, Appllama): tell the user to authorize
-  them via `/mcp`. Claude can't start OAuth itself. Mobbin is optional, because design
-  research can fall back to Appllama or web search, but say so.
+  them via `/mcp`. Claude can't start OAuth itself. Only the tools picked in round T are needed. If
+  one can't be connected, offer to drop it (the run falls back to the other chosen sources,
+  or to web research) and record that in `docs/RUN.md`.
 - **Gemini key**: if `gemini.apiKey` is in config and preflight gets HTTP 429 ("spending
   cap"), the user has to raise the cap in Google Cloud. A Gemini *subscription* (AI Pro,
   Edu) does **not** fund the API. Say this up front if any spend is planned.
