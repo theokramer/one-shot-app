@@ -45,7 +45,7 @@ selection, saved config or a signed-in session cannot grant an external permissi
 | 0 | First-run setup if needed (`setup.py status`), else load the library silently | ⏸ first run only | [intake.md](references/intake.md#0-first-run-setup-and-the-library) |
 | 1 | Pitch: "What app do you want to build?" | ⏸ | [intake.md](references/intake.md) |
 | 2 | Menu: modules, store depth, permissions (`AskUserQuestion`, multi-select) | ⏸ | [intake.md](references/intake.md), [modules.md](references/modules.md) |
-| 3 | Follow-up questions: name, stack, pricing, free vs Pro | ⏸ | [intake.md](references/intake.md) |
+| 3 | Follow-up questions: name, stack, pricing, free vs Pro, **mascot** (if yes: 3 concepts sketched and one picked now) | ⏸ | [intake.md](references/intake.md) · [mascot.md](references/mascot.md) |
 | 4 | **Connect**: verify approved tools and account access | ⏸ for selected services | [connect.md](references/connect.md) |
 | 5 | Plan: `docs/PLAN.md` and a short summary, approve the plan and scoped permissions | ⏸ | [intake.md](references/intake.md) |
 | 6 | Research matrix (with the chosen research tools), then scaffold + build the app (first win + retention loop first), then an autonomous QA loop | ▶ | [research-sources.md](references/research-sources.md) · [mobbin-playbook.md](references/mobbin-playbook.md) · [prompts.md](references/prompts.md) · [scaffold.md](references/scaffold.md) (SwiftUI) · [expo.md](references/expo.md) (Expo) · [app-build.md](references/app-build.md) · [demo.md](references/demo.md) |

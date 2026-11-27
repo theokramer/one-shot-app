@@ -38,6 +38,8 @@ from generic UI:
   touch, haptics on the win and on purchase. Nothing loops for no reason.
   Imagery: real app renders/captures or licensed 3D (Blender, CC0). No AI people.
   Native feel: HIG navigation, sheets, safe areas, 44 pt targets, Dynamic Type survives.
+  Mascot: <name + mood per screen from MASCOT.md, ≤ 25 % of the screen, never near the
+  price or CTA> (or "none").
 </design_direction>
 ```
 
@@ -139,7 +141,7 @@ context and only the images and this prompt, so it judges what a new user sees.
   2. What would make me hesitate or quit here?
   3. Is the value I'll get clearer than on the previous screen?
   4. Visual: anything generic, misaligned, inconsistent with the other screens, or hard to
-     read at arm's length?
+     read at arm's length? If there is a mascot: is it on-model, and does it help or distract?
   Then list the 5 changes with the biggest likely effect on reaching the first win and
   starting the trial, most important first, each tied to one screen.
   Do not praise. Do not invent statistics.
@@ -147,6 +149,11 @@ context and only the images and this prompt, so it judges what a new user sees.
 ```
 
 Fix the top findings, re-screenshot, and keep the before/after for the final report.
+
+## 7b. Mascot concept brief
+
+In [mascot.md §4](mascot.md#4-the-concept-brief): three original concepts, written and
+sketched in step 3 so the user picks one before the plan.
 
 ## 8. Briefing a subagent
 
