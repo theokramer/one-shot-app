@@ -17,7 +17,10 @@ TikTokBusinessSDK and AppTrackingTransparency.
    (`setFBAnonymousID`, `enableAdServicesAttributionTokenCollection()`).
 4. SKAdNetwork IDs for Meta and TikTok in Info.plist (`SKAdNetworkItems`).
 5. Privacy manifest + App Privacy: tracking = **yes** for Device ID, Purchase History,
-   Product Interaction. Name Meta and TikTok in the privacy policy.
+   Product Interaction. Name Meta and TikTok in the privacy policy. With tracking = yes the
+   manifest's `NSPrivacyTrackingDomains` **must not be empty**: list `ep1.facebook.com`
+   (Meta's tracking domain). An empty list passes upload, then App Review marks the version
+   "Invalid Binary" (ITMS-91064). `check_manifest.py` catches this before upload.
 6. **Attribution must never break the app**: wrap it in try/catch, and use a 5 s timeout
    on the config fetch.
 7. Verify on the simulator: launch, then grep the log for `ep2.facebook.com/…/<META_APP_ID>`.

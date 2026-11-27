@@ -127,6 +127,8 @@ Run before the final report, and fix what fails:
 - [ ] No unused permission keys (Face ID from expo-secure-store, local network from
       expo-dev-client, which must never ship). `NSPhotoLibraryAddUsageDescription` is
       present if any share sheet exists (otherwise "Save Image" crashes)
+- [ ] `check_manifest.py <archive>` passes (tracking on ⇒ tracking domains listed; tracking
+  off ⇒ none listed). Otherwise the version turns "Invalid Binary" minutes after submitting.
 - [ ] App Privacy ⇔ privacy manifest ⇔ policy ⇔ SDK list all agree; ATT shown only if
       tracking SDKs are present
 - [ ] Icon 1024, no alpha; screenshots match the current UI
@@ -134,3 +136,13 @@ Run before the final report, and fix what fails:
 - [ ] Subscriptions "Ready to Submit", attached to the version
 - [ ] Duplicate-app risk (4.3) checked against the account's other apps
 - [ ] Kids category is not used if any analytics/ads SDK is present (1.3)
+
+## When the version turns "Invalid Binary"
+
+The build shows VALID, the submission goes in, and minutes later the version state is
+`INVALID_BINARY`. The API, the version page and TestFlight show **no reason**: Apple sends
+it only by email ("ITMS-xxxxx: …"). Ask the user for that email instead of guessing. The
+known cause from real runs is ITMS-91064 (tracking on, tracking-domain list empty).
+Fix it in `app.json`, `npx expo prebuild --clean`, rebuild with a new build number,
+attach, then in the web UI open the submission (version page → "Update Review") and
+click "Resubmit to App Review". The API can't change a submission with unresolved issues.

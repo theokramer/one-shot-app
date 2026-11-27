@@ -73,6 +73,9 @@ with Path(sys.argv[1]).open("rb") as archive:
 if properties.get("CFBundleIdentifier") != app["bundleIdentifier"] or properties.get("Team") != sys.argv[2]:
     raise SystemExit("Archive does not match this project's app bundle and signing team")
 PY_CHECK_ARCHIVE
+# Stop before upload if a privacy manifest would turn the version into "Invalid Binary"
+# (ITMS-91064). Copy assets/scripts/check_manifest.py to scripts/ next to this file.
+python3 scripts/check_manifest.py "$AR"
 
 # ExportOptions uses Apple's upload destination, so there is no persistent key copy.
 cat > "$RELEASE_TMP/ExportOptions.plist" <<PLIST

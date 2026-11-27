@@ -17,7 +17,10 @@ cd <App> && npx expo install expo-dev-client           # dev only, never in the 
   `ios.appleTeamId` = **`config.developer.appleTeamID`**. Watch out: the certificate shows
   a *personal* ID, which is **not** the team ID from ASC → Membership.
   `ITSAppUsesNonExemptEncryption: false`, `CFBundleAllowMixedLocalizations: true` when
-  localized, `ios.privacyManifests` filled.
+  localized, `ios.privacyManifests` filled. If `NSPrivacyTracking` is true, `NSPrivacyTrackingDomains`
+  must list the tracking SDKs' domains (Meta: `ep1.facebook.com`); if it is false, the list
+  must be empty. `expo prebuild` never rewrites an existing `ios/<App>/PrivacyInfo.xcprivacy`,
+  so after changing `privacyManifests` run `npx expo prebuild --clean` (then `pod install`).
 - Typical stack that worked: expo-router (native tabs), Reanimated 4, Skia,
   zustand (persisted), TanStack Query, expo-image, expo-haptics.
 - Libraries with known fixes: **react-native-maps ≥ 1.29** (1.20 crashes on the new
@@ -58,7 +61,9 @@ add `messages/<lang>.ts` per language, and ship with
 
 ## Release
 
-Template: `assets/expo/release.sh`. After approving the exact Apple app and build, run
+Template: `assets/expo/release.sh` plus `assets/scripts/check_manifest.py`; copy **both**
+into the app's `scripts/`. The release refuses to upload when the privacy manifest would
+make Apple mark the version "Invalid Binary" (ITMS-91064). After approving the exact Apple app and build, run
 `scripts/release.sh --upload` (or add `--archive PATH` for a verified existing archive).
 The script stages output in a temporary directory and refuses to upload an incomplete
 archive. Handle metadata separately. Attach with `asc.py attach-build --apply` only after

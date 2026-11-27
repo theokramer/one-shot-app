@@ -154,3 +154,12 @@ trial timeline. On a 6.1" phone the plans and CTA fell below the fold. Rule now:
 two plans (yearly + weekly or yearly + monthly), at most three one-line perks, a two-row
 timeline, and the whole paywall fits one screen without scrolling (tiny devices excepted).
 See [conversion.md §3](conversion.md#3-paywalls-that-convert-and-pass-review).
+
+## "Invalid Binary" from an empty tracking-domain list (twice)
+Two apps with the Meta + TikTok SDKs set `NSPrivacyTracking: true` with an empty
+`NSPrivacyTrackingDomains`. The upload passed and the build showed VALID, but after
+submitting, the version flipped to "Invalid Binary" with ITMS-91064, which Apple explains
+only by email. One run then rebuilt without effect, because `expo prebuild` does not
+overwrite an existing `PrivacyInfo.xcprivacy`. Now `ep1.facebook.com` is listed, prebuild
+runs with `--clean`, and `assets/scripts/check_manifest.py` runs inside `release.sh`, so
+the release stops before uploading a build that would fail this way.
