@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """First-run setup and account config for one-shot-app.
 
-    setup.py status                      # first run? which config fields are still empty (no values printed)
+    setup.py status [--services ...]      # local checks unless services are selected
     setup.py init                        # create ~/.one-shot-app/ (migrates an old in-skill config)
     setup.py set developer.appleTeamID=ABCDE12345 projects.parentDir=~/Developer ...   # non-secret values
     setup.py secret gemini.apiKey        # hidden prompt; run by the USER in their own terminal
@@ -23,9 +23,11 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import paths  # noqa: E402
 
 SECRETS = {"gemini.apiKey", "revenuecat.apiV2Key", "netlify.authToken", "supabase.accessToken"}
-# what a first run needs before the menu (the rest is per module and checked by preflight)
-CORE = ["developer.appleTeamID", "developer.bundleIdPrefix", "developer.githubOwner",
-        "appStoreConnect.keyId", "appStoreConnect.issuerId", "appStoreConnect.privateKeyPath"]
+SERVICE_FIELDS = {
+    "github": ["developer.githubOwner"],
+    "asc": ["developer.appleTeamID", "developer.bundleIdPrefix", "appStoreConnect.keyId",
+            "appStoreConnect.issuerId", "appStoreConnect.privateKeyPath"],
+}
 OPTIONAL = ["developer.appleAccountEmail", "projects.parentDir", "cloudflare.workersSubdomain", "gemini.apiKey"]
 
 
@@ -62,13 +64,13 @@ def run(cmd):
         return ""
 
 
-def status():
+def status(services=()):
     first = not paths.CONFIG.exists() or not paths.PROFILE.exists()
     c = load()
-    missing = [f for f in CORE if not dig(c, f)]
+    missing = [f for service in services for f in SERVICE_FIELDS[service] if not dig(c, f)]
     opt = [f for f in OPTIONAL if not dig(c, f)]
     p8 = dig(c, "appStoreConnect.privateKeyPath")
-    if p8 and not pathlib.Path(p8).expanduser().exists():
+    if "asc" in services and p8 and not pathlib.Path(p8).expanduser().exists():
         missing.append("appStoreConnect.privateKeyPath (file not found)")
     print(f"data home   {paths.HOME}")
     print(f"first run   {'yes' if first or missing else 'no'}")
@@ -77,10 +79,10 @@ def status():
     raise SystemExit(1 if missing else 0)
 
 
-def detect():
+def detect(include_github=False):
     """Facts to turn into pre-filled options, so the user clicks instead of typing."""
-    gh = run(["gh", "api", "user", "--jq", ".login"])
-    orgs = run(["gh", "api", "user/orgs", "--jq", ".[].login"]).split()
+    gh = run(["gh", "api", "user", "--jq", ".login"]) if include_github else ""
+    orgs = run(["gh", "api", "user/orgs", "--jq", ".[].login"]).split() if include_github else []
     git_email = run(["git", "config", "--global", "user.email"])
     git_name = run(["git", "config", "--global", "user.name"])
     dirs = [d for d in ("~/Documents", "~/Developer", "~/Projects", "~/code") if pathlib.Path(d).expanduser().is_dir()]
@@ -122,9 +124,13 @@ def main():
         for m in paths.ensure_home() or ["already set up at " + str(paths.HOME)]:
             print(m)
     elif cmd == "status":
-        status()
+        if any(service not in SERVICE_FIELDS for service in a[1:]) or (a and a[0] != "--services"):
+            raise SystemExit("Use status [--services github asc]")
+        status(a[1:])
     elif cmd == "detect":
-        detect()
+        if a not in ([], ["--github"]):
+            raise SystemExit("Use detect [--github]")
+        detect(include_github=bool(a))
     elif cmd == "set":
         c = load()
         for kv in a:

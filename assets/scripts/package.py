@@ -31,7 +31,7 @@ PRIVATE_NAMES = {"config.json", "profile.json", "secrets.json", "learnings.local
 EXCLUDE_NAMES = PRIVATE_NAMES | {".DS_Store", "__pycache__", ".git", "dist", "node_modules", ".venv", "venv"}
 PRIVATE_SUFFIXES = {".p8", ".pem", ".key", ".p12", ".pfx", ".mobileprovision", ".cer"}
 SOURCE_SUFFIXES = {".md", ".py", ".sh", ".swift", ".ts", ".tsx", ".template", ".yml", ".yaml"}
-ROOT_FILES = {"README.md", "SKILL.md", "LICENSE", ".gitignore", "config.example.json", "profile.example.json"}
+ROOT_FILES = {"README.md", "SKILL.md", "LICENSE", "SECURITY.md", ".gitignore", "config.example.json", "profile.example.json"}
 PATTERNS = {
     "email": re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}"),
     "phone": re.compile(r"(?<!\w)\+\d[\d ()-]{8,}\d"),

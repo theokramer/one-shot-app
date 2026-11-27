@@ -9,14 +9,12 @@ gets all the way to the entitlement step and dies with
     scope to access this endpoint.
 
 by which point the app is already built. A secret v2 key from config.json with
-explicit scopes removes that whole class of failure, and `verify` proves the
-scopes before a single line of Swift is written.
+explicit scopes allows provisioning. Verify checks authentication without any writes.
 
-Every operation is find-or-create, so re-running against a half-provisioned
-project finishes the job instead of erroring on duplicates.
+Resume against an existing project only after verifying its ID and passing --project-id.
 
     revenuecat.py verify
-    revenuecat.py provision --app-name MyApp --bundle-id com.example.myapp \
+    revenuecat.py provision --apply --app-name MyApp --bundle-id com.example.myapp \
         --entitlement pro --annual com.example.myapp.pro.annual \
         --monthly com.example.myapp.pro.monthly
 """
@@ -26,6 +24,7 @@ import argparse
 import json
 import os
 import pathlib
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -34,6 +33,7 @@ SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 import sys as _sys, pathlib as _pl
 _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
 import paths  # noqa: E402
+from http_safety import open_request  # noqa: E402
 CONFIG = paths.CONFIG
 
 REQUIRED_SCOPES = [
@@ -75,7 +75,7 @@ class RevenueCat:
             },
         )
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with open_request(req, timeout=60) as resp:
                 raw = resp.read()
                 return json.loads(raw) if raw else {}
         except urllib.error.HTTPError as exc:
@@ -94,15 +94,6 @@ class RevenueCat:
 
     def find(self, path: str, field: str, value: str):
         return next((i for i in self.items(path) if i.get(field) == value), None)
-
-    def ensure_project(self, name: str) -> str:
-        existing = self.find("/projects?limit=100", "name", name)
-        if existing:
-            print(f"project  reused   {existing['id']}  {name}")
-            return existing["id"]
-        created = self.request("POST", "/projects", {"name": name})
-        print(f"project  created  {created['id']}  {name}")
-        return created["id"]
 
     def ensure_app(self, project_id: str, name: str, bundle_id: str) -> str:
         for app in self.items(f"/projects/{project_id}/apps?limit=100"):
@@ -216,59 +207,28 @@ def client() -> RevenueCat:
             "  Create one: RevenueCat → Project settings → API keys → New → Secret (v2)\n"
             "  Required scopes:\n    " + "\n    ".join(REQUIRED_SCOPES)
         )
-    base = cfg.get("revenuecat", {}).get("apiBase") or "https://api.revenuecat.com/v2"
-    return RevenueCat(key, base)
+    return RevenueCat(key, "https://api.revenuecat.com/v2")
 
 
 def cmd_verify(_args):
-    """Prove every scope with a real call before the run commits to anything."""
+    """Check authentication using a read-only request."""
     rc = client()
-    probe_name = "one-shot-app scope probe"
     try:
         rc.items("/projects?limit=1")
     except RevenueCatError as exc:
-        die(f"cannot list projects ({exc}). Is the key a *secret v2* key?")
-
-    # A throwaway project is the only way to prove write scope without touching
-    # something real. It is deleted immediately afterwards.
-    try:
-        project = rc.request("POST", "/projects", {"name": probe_name})
-    except RevenueCatError as exc:
-        die(
-            f"write probe failed ({exc}).\n"
-            "  The key is missing project_configuration:projects:read_write.\n"
-            "  Required scopes:\n    " + "\n    ".join(REQUIRED_SCOPES)
-        )
-
-    project_id = project["id"]
-    missing = []
-    try:
-        try:
-            rc.request("POST", f"/projects/{project_id}/entitlements",
-                       {"lookup_key": "probe", "display_name": "probe"})
-        except RevenueCatError:
-            missing.append("project_configuration:entitlements:read_write")
-        try:
-            rc.request("POST", f"/projects/{project_id}/offerings",
-                       {"lookup_key": "probe", "display_name": "probe"})
-        except RevenueCatError:
-            missing.append("project_configuration:offerings:read_write")
-    finally:
-        try:
-            rc.request("DELETE", f"/projects/{project_id}")
-        except RevenueCatError:
-            print(f"note: could not delete the probe project {project_id} — "
-                  f"remove '{probe_name}' from the RevenueCat dashboard by hand.",
-                  file=sys.stderr)
-
-    if missing:
-        die("key is missing scopes:\n    " + "\n    ".join(missing))
-    print("revenuecat: key verified, all required scopes present")
+        die(f"cannot list projects (HTTP {exc.status})")
+    print("RevenueCat key can list projects; write permissions were not tested")
 
 
 def cmd_provision(args):
     rc = client()
-    project_id = rc.ensure_project(args.app_name)
+    if args.project_id:
+        rc.request("GET", f"/projects/{args.project_id}")
+        project_id = args.project_id
+    else:
+        if rc.find("/projects?limit=100", "name", args.app_name):
+            die("Project name already exists. Verify its ID and pass --project-id to reuse it.")
+        project_id = rc.request("POST", "/projects", {"name": args.app_name})["id"]
     app_id = rc.ensure_app(project_id, args.app_name, args.bundle_id)
     entitlement_id = rc.ensure_entitlement(project_id, args.entitlement, f"{args.app_name} Pro")
 
@@ -303,7 +263,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("verify", help="prove the key's scopes before the run starts")
+    sub.add_parser("verify", help="check authentication without writing")
 
     prov = sub.add_parser("provision", help="create project, app, entitlement, products, offering")
     prov.add_argument("--app-name", required=True)
@@ -312,7 +272,13 @@ def main():
     prov.add_argument("--annual", required=True, help="App Store product id for the annual plan")
     prov.add_argument("--monthly", required=True, help="App Store product id for the monthly plan")
 
+    prov.add_argument("--apply", action="store_true", help="perform approved writes")
+    prov.add_argument("--project-id", help="explicit ID of an existing project")
     args = parser.parse_args()
+    if args.command == "provision" and not args.apply:
+        parser.error("provision requires --apply after approval")
+    if args.command == "provision" and args.project_id and not re.fullmatch(r"[A-Za-z0-9_-]+", args.project_id):
+        parser.error("invalid RevenueCat project ID")
     {"verify": cmd_verify, "provision": cmd_provision}[args.command](args)
 
 

@@ -13,7 +13,7 @@
     "parentDir": "~/Documents"
   },
   "appStoreConnect": {
-    "_comment": "REQUIRED. App Store Connect → Users and Access → Integrations → App Store Connect API → generate a team key with App Manager access. The .p8 downloads exactly once; put it somewhere outside any repo and point privateKeyPath at it. Phase 0 loads it into the Superwall ASC proxy (`superwall asc keys set`) so app records and subscriptions can be created without minting a local JWT, and Phase 8 base64-encodes it straight from this path into the GitHub secret. The file is never copied into a repo and never printed.",
+    "_comment": "Keep the .p8 outside repositories. Use an appropriate scoped key. The direct client reads it locally. Do not upload it to a proxy or GitHub without separate, explicit approval for that recipient.",
     "keyId": "",
     "issuerId": "",
     "privateKeyPath": ""
@@ -38,14 +38,14 @@
     "sitePrefix": ""
   },
   "github": {
-    "_comment": "The autonomous review loop. reviewer must be the literal string 'Copilot' — the API rejects 'copilot-pull-request-reviewer' with 422. With autoMerge true the skill merges its own PR once CI is green and Copilot's comments are addressed, which is what triggers the App Store upload.",
+    "_comment": "Legacy preference only. The current run needs explicit authorization to merge a specific PR. Defaults to manual.",
     "reviewer": "Copilot",
-    "autoMerge": true,
+    "autoMerge": false,
     "reviewTimeoutSeconds": 420
   },
   "appStoreDeploy": {
-    "_comment": "When true, Phase 8 arms APP_STORE_DEPLOY_ENABLED so a merge to main archives and uploads. The workflow still fails harmlessly until the app record and subscriptions exist in App Store Connect.",
-    "armOnSetup": true
+    "_comment": "Legacy preference only. Upload workflows stay dormant until the user deliberately configures an upload mode for this repository.",
+    "armOnSetup": false
   },
   "supabase": {
     "_comment": "Only needed when the app requires a backend. Access token from supabase.com/dashboard/account/tokens.",

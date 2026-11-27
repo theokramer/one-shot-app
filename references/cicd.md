@@ -1,40 +1,20 @@
-# CI/CD — merge a PR, land in App Store Connect
+# CI/CD and App Store Connect uploads
 
-Two workflows, copied from `assets/workflows/` with `__APP_NAME__` substituted:
+Copy the unsigned `ci.yml` independently of the upload workflow. Use GitHub-hosted
+runners, read-only tokens and no secrets for pull requests. Require a PR and passing
+CI on `main`, and block force pushes and branch deletion.
 
-- **`ci.yml`** — builds unsigned on every PR and every push to `main`. Fast, no secrets.
-  This is the check the PR loop waits on.
-- **`app-store.yml`** — on push to `main`, archives with signing and uploads. Gated behind a
-  repo variable.
+Install `app-store.yml` only if selected. It starts off. Before placing a key in GitHub,
+ask for separate approval to share that key with the exact repository environment.
+Use a scoped key only for the approved app when available. Restrict the `app-store`
+environment to the exact `main` branch before entering secrets. Use environment
+secrets `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_PRIVATE_KEY_BASE64`. The user may add
+them directly or explicitly authorize the transfer. Keep repository-wide secrets empty.
+Never copy the key into Git or print it.
 
-## Secrets — read straight from config.json, never typed
-
-Phase 4 verified all three values exist and that the `.p8` is where it says it is. Set them
-without ever printing the key:
-
-```bash
-gh api -X PUT "repos/$OWNER/$REPO/environments/app-store"
-
-KEY_ID=$(python3 -c "import json;print(json.load(open('$HOME/.one-shot-app/config.json'))['appStoreConnect']['keyId'])")
-ISSUER=$(python3 -c "import json;print(json.load(open('$HOME/.one-shot-app/config.json'))['appStoreConnect']['issuerId'])")
-P8=$(python3 -c "import json,os;print(os.path.expanduser(json.load(open('$HOME/.one-shot-app/config.json'))['appStoreConnect']['privateKeyPath']))")
-
-gh secret set ASC_KEY_ID              --env app-store --body "$KEY_ID"
-gh secret set ASC_ISSUER_ID           --env app-store --body "$ISSUER"
-gh secret set ASC_PRIVATE_KEY_BASE64  --env app-store < <(base64 -i "$P8")
-```
-
-The environment is created first so the user can later add a required reviewer and make
-every upload need a human click.
-
-**Never** copy the `.p8` into the repo, never print its contents, never paste it into chat.
-Encode straight from the path.
-
-Verify without shipping anything:
-
-```bash
-gh secret list --env app-store
-```
+If the user requires a GitHub environment reviewer, configure and verify that gate
+before enabling uploads. If the plan cannot enforce it, keep the workflow disabled
+and use a user-dispatched upload or a local handoff, according to the chosen permission.
 
 ## The App Store Connect app record
 
@@ -60,33 +40,19 @@ with everything that doesn't need it. Never handle the Apple ID password.
 The store name must be unique across the whole App Store. Phase 3 checked it with the iTunes
 search API; keep two fallback names ready in `docs/RUN.md`.
 
-## Arming the deploy
+## Choose the upload mode
 
-```yaml
-if: ${{ vars.APP_STORE_DEPLOY_ENABLED == 'true' }}
-```
+| Repository variable | Effect |
+|---|---|
+| Unset | Disabled (default). |
+| `APP_STORE_DEPLOY_MODE=manual` | The workflow runs only when the user chooses **Run workflow** for `main`. |
+| `APP_STORE_DEPLOY_MODE=automatic` | Every push to protected `main` uploads a build. Set it only after explicit approval for ongoing uploads and verified branch protection. |
 
-With `appStoreDeploy.armOnSetup: true` in `config.json` — the default — Phase 10 arms it:
-
-```bash
-gh variable set APP_STORE_DEPLOY_ENABLED --body true
-```
-
-That is what makes the pipeline autonomous: a merged PR becomes a TestFlight build without
-anyone touching a dashboard. Set `armOnSetup` to `false` for a run that should stay on the
-ground.
-
-Say plainly in the final report that it is armed, and that the next merge ships.
-
-## Why merges, not pushes
-
-`main` is protected by convention, not by branch rules: everything after the one-shot
-arrives through a squashed PR (see [pr-mode.md](pr-mode.md)). The upload therefore triggers
-once per accepted change, with a build number Apple assigns — no collisions from repeated
-pushes, no half-finished branch reaching TestFlight.
-
-`concurrency.cancel-in-progress` is `false` on the upload and `true` on CI: a superseded PR
-build is worthless, a half-delivered upload confuses App Store Connect.
+Use a required environment reviewer if the user wants a separate approval after dispatch
+or merge. If no such reviewer can be configured and that gate is required, leave the
+workflow disabled. Explain that automatic mode can continue after the session. Remove
+the variable to disarm future jobs. Cancel already queued jobs in GitHub if needed.
+Legacy `APP_STORE_DEPLOY_ENABLED` values do not enable this version.
 
 ## Signing
 
@@ -116,5 +82,4 @@ it — that ships a build. Read it, confirm the secrets exist, and move on.
 ## For the final report
 
 Record it in `docs/RUN.md` for the final report: CI is green, the deploy workflow exists and
-is armed (or not, and why), the secrets are set, the app record exists. Then continue. There
-is no stop here.
+is armed (or not, and why), the selected mode, environment restrictions and any approvals still pending.

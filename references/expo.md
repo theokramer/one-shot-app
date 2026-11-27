@@ -58,14 +58,11 @@ add `messages/<lang>.ts` per language, and ship with
 
 ## Release
 
-Template: `assets/expo/release.sh`. It archives, exports with the ASC key from config,
-and uploads with `altool`, then optionally runs `fastlane deliver` for metadata.
-
-- **Superwall's libcel xcframework always breaks the end of `xcodebuild archive`** with a
-  signature collision, and no archive `Info.plist` is written. The app inside is complete
-  and signed. The script writes the plist by hand and exports. Don't try to "fix" it.
-- Archive ~10 min. Run it in the background, then `asc.py attach-build` waits for
-  `VALID` (5–15 min) and attaches it.
+Template: `assets/expo/release.sh`. After approving the exact Apple app and build, run
+`scripts/release.sh --upload` (or add `--archive PATH` for a verified existing archive).
+The script stages output in a temporary directory and refuses to upload an incomplete
+archive. Handle metadata separately. Attach with `asc.py attach-build --apply` only after
+approval, then wait for processing. Submission for App Review is performed by the user.
 
 ## QA in the simulator
 

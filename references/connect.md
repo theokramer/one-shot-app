@@ -1,18 +1,15 @@
-# Phase 4: Connect everything (the hard gate)
+# Phase 4: Verify approved connections
 
-The goal: when this phase ends, **nothing later in the run can need the user.** Every
-credential is proved with a real call, every interactive login is done, and every piece of
-browser work that needs a human hand has been done while the human is there.
-
-Order matters. Do it top to bottom, and batch what the user must type into as few moments
-as possible.
+Use the [permissions policy](permissions.md) before signing in or calling authenticated
+services. Phase 4 is verification. Keep local work moving when credentials or approvals
+are missing. Defer provisioning and other remote writes until their exact scope is approved.
 
 ---
 
 ## 4.1 Machine check (automatic, ~30 s)
 
 ```bash
-python3 "$SKILL/assets/scripts/preflight.py" --fix \
+python3 "$SKILL/assets/scripts/preflight.py" \
   --modules core,asc,revenuecat,superwall,cloudflare,meta,tiktok,gemini   # only the ticked ones
 ```
 
@@ -47,7 +44,7 @@ as a single block, for example:
   cap"), the user has to raise the cap in Google Cloud. A Gemini *subscription* (AI Pro,
   Edu) does **not** fund the API. Say this up front if any spend is planned.
 
-Re-run preflight until it exits 0. **Do not continue past a failure.**
+Re-run the affected checks. A failed check blocks only the dependent action. A Superwall proxy connection is optional and must already be configured by the user if selected. Prefer the direct API when it supports the task.
 
 Preflight also reads the library (`~/.one-shot-app/profile.json`). Missing imprint or review-contact data
 shows up under "Needs you". It should already have been collected in intake step 3; if
@@ -61,7 +58,7 @@ before you move on.
 
 ## 4.2 Provision the accounts that the attended steps need
 
-These are CLI-only and quick, but phase 4.3 needs their IDs:
+These are remote writes. Do them only after the exact target and action have been approved for this run. Otherwise move them to the plan or handoff.
 
 1. Check the store name is free (US + DE iTunes search) and the bundle ID is unused.
 2. `rc projects create --name <App>` → `rc apps create` (App Store, bundle ID). Save the
@@ -89,8 +86,7 @@ your own (never take "done" on faith):
 
 Rules for this block:
 
-- **Chrome comes first, and everything happens in this block.** If any later phase needs
-  Chrome, its sign-in happens here, so the user can walk away. Load all the Chrome tools in
+- Use Chrome only when needed for an approved action. The user signs in themselves. Load all the Chrome tools in
   one `ToolSearch` call. Work in new tabs. If the extension isn't connected, ask the user to
   connect it, and don't fall back silently.
 - The built-in browser pane **doesn't share** the user's Chrome sign-ins. Use Claude in
@@ -98,13 +94,12 @@ Rules for this block:
 - Never type a password, 2FA code, API token, client token or payment detail, even if
   the user offers or insists. Hand over the exact field and the exact value's location
   ("App settings → Advanced → Client token").
-- Accepting a platform's developer terms or creating an app on it needs the "Create &
-  connect accounts" tick. Without the tick, put it on the to-do list and build the SDK
-  wiring anyway, with IDs from the server.
+- The user accepts developer terms. Creating an app and linking an ad account each need
+  an approved action and destination. Unapproved actions stay on the to-do list.
 
 ## 4.4 Prove the unattended path
 
-Before writing the plan, run one cheap call through each surface the run will use, and
+After read access is approved, run one read-only check per selected surface, and
 record it in `docs/RUN.md`:
 
 - `superwall asc get /v1/apps/<id>` → 200

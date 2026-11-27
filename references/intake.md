@@ -9,36 +9,19 @@ five minutes of clicking, and less every run, because of the library. Phase 4
 ## 0. First-run setup, and the library
 
 ```bash
-python3 "$SKILL/assets/scripts/setup.py" status      # exit 1 = first run / core config missing
+python3 "$SKILL/assets/scripts/setup.py" status      # check local setup
 ```
 
-**If it's a first run** (no `~/.one-shot-app/`, or core fields missing), greet in one line
-("First time: two minutes of setup, then this is never asked again") and collect what's
-missing. **Choices first, typing last, secrets never in chat:**
+On first use, create local settings and show the autonomy choices before connecting
+any accounts. `setup.py detect` checks local tools. Run `setup.py detect --github`
+only after the user approves reading their GitHub account and memberships. Offer
+detected project folders and the default stack as choices.
 
-1. `setup.py detect` → GitHub login and orgs, whether Git identity is configured, project folders, installed
-   tools. Turn them into options.
-2. One `AskUserQuestion` card (≤ 4 questions), pre-filled from `detect`:
-   - **GitHub owner**: `<login>` · `<org1>` · `<org2>`
-   - **Bundle ID prefix**: `com.<login>` · `com.<org>` · "Other"
-   - **Projects folder**: the detected folders (`~/Documents` · `~/Developer` · …)
-   - **Default stack**: Expo · SwiftUI
-3. A second card: **App Store Connect API key**: "I have a .p8 key file" · "Help me create
-   one" (steps: ASC → Users and Access → Integrations → App Store Connect API → Team key, App
-   Manager. It downloads once; move it outside any repo). **Gemini (optional)**: "Add a key
-   later" · "I have a key". **Public support email for app sites**: "Use saved public support email" · "Enter locally".
-   Never publish the Git or Apple account email as a default.
-4. One plain message for the remaining typed values, all non-secret: Apple **Team ID**
-   (ASC → Membership; not the certificate's personal ID), ASC **Key ID** and **Issuer ID**,
-   and the **path** to the `.p8`. Never search the disk for key files. Save them with
-   `setup.py set developer.appleTeamID=… appStoreConnect.keyId=… …`.
-5. **Secrets** (Gemini key, optional fallbacks): start `setup.py secret gemini.apiKey` in the
-   user's terminal (`mcp__terminal__run_in_terminal`). They paste into a hidden prompt. Never
-   ask for a key in chat.
-6. The library's personal fields (name, imprint, review contact) are collected by the
-   [missing-data card](#missing-library-data-asked-once-ever) in step 3, so first-run users
-   go through it once.
-7. `setup.py status` → exit 0, then continue with the pitch.
+Request account setup only for approved services in phase 4. Use
+`setup.py status --services github asc` with only the selected entries. For App Store
+Connect, ask the user to configure the key path locally. For service secrets, direct
+the user to `setup.py secret <field>` in their terminal. Keep private contact and
+credential values out of chat. Unconnected services should not block a local build.
 
 Returning users skip all of this. Check the library without printing private values:
 
@@ -186,7 +169,7 @@ as `toolDefaults` with `profile.py save-tools '{…}'`. Every later phase reads
     "options": [
       { "label": "Cloudflare Worker", "description": "Server-side AI/API keys (OpenAI → Workers AI fallback), D1/R2 storage, rate limits, and it also hosts the support/privacy/terms site." },
       { "label": "Supabase", "description": "Accounts, sync across devices, shared/social data." },
-      { "label": "GitHub repo + CI/CD", "description": "Private repo, CI on every push, App Store upload on merge to main, PR + Copilot review loop afterwards." },
+      { "label": "GitHub repo + CI/CD", "description": "Private repo and unsigned CI. PR merge and automatic App Store uploads each need separate permission." },
       { "label": "Localization", "description": "App + store listing in more languages (asked next). English stays primary." } ] },
   { "header": "Growth", "multiSelect": true,
     "question": "Which growth and ads pieces should be wired in now?",
@@ -236,7 +219,7 @@ upload and attach. These options are the extras:
   { "header": "Run style", "multiSelect": false,
     "question": "After the plan is approved, should I stop anywhere?",
     "options": [
-      { "label": "Fully unattended", "description": "I build, test, fix and fill the store on my own; you get a final report with screenshots and a short to-do list." },
+      { "label": "Fully unattended", "description": "I work through local tasks and actions you explicitly authorize to run automatically." },
       { "label": "One demo stop", "description": "I stop once when the app runs, before store assets, so you can ask for changes." } ] }
 ]
 ```
@@ -290,39 +273,16 @@ price isn't below all of them, note that in `DECISIONS.md`, and keep the user's 
 Save the answers to `menuDefaults` as `paywallVariants`, `priceTests`, `retentionPrice`
 and `retentionForm`.
 
-### Round C: permissions and money
+### Round C: autonomy, approvals and budget
 
-Before calling it, say in one line what is **never** done, whatever is ticked:
+Use [the permissions policy](permissions.md). Offer Local only, Review each action, and
+Autonomous within limits. Then let the user override any action group to Off, Ask first,
+User only or Automatic. Record the exact destinations and scope. Keep the approval
+record outside Git. Do this before using any signed-in account or making a remote change.
 
-> Whatever you tick, I won't type passwords, 2FA codes, API tokens or payment details into
-> a website, approve my own permission prompts, buy anything, start ads, or submit for App
-> Review. Those stay yours, and I'll queue any that come up for you.
-
-```jsonc
-[
-  { "header": "Allowed", "multiSelect": true,
-    "question": "What may I do without asking again during this run?",
-    "options": [
-      { "label": "Create & connect accounts", "description": "New RevenueCat/Superwall project, Meta developer app + link to your ad account, TikTok Events Manager data source, RevenueCat integrations and webhooks. Includes accepting those platforms' developer terms." },
-      { "label": "Write to App Store Connect", "description": "Create the app record (with your `rc setup apple`), subscriptions, prices, offers, availability, listing, uploads, attach builds, publish App Privacy. Never submits for review." },
-      { "label": "Deploy to the web", "description": "Create the GitHub repo, set secrets, deploy Cloudflare Workers (backend + site), Supabase project." },
-      { "label": "Spend on AI generation", "description": "Gemini image/video etc. up to the cap you choose next. Without this tick: $0, local renders only." } ] },
-  { "header": "Spend cap", "multiSelect": false,
-    "question": "Maximum extra spend on generation APIs for this run?",
-    "options": [
-      { "label": "$0", "description": "Local only: Blender, CC0 assets, Pillow, ffmpeg." },
-      { "label": "Up to $5", "description": "Icon concepts and a few images." },
-      { "label": "Up to $20", "description": "Plus one or two short AI video clips." },
-      { "label": "Up to $50", "description": "Plenty of headroom; I still log every call's cost." } ] },
-  /* the name and pricing questions from step 3 can ride along in this same call */
-]
-```
-
-Write the answers to `docs/RUN.md` (modules, depth, languages, run style, experiments,
-retention price, permissions, cap)
-straight away. Every later phase reads it, and the final report quotes it back. Save the
-menu answers (not the permissions, which are per run) to the library:
-`profile.py save-menu '{"money": [...], "backend": [...], ...}'`.
+Confirm the total budget and any per-service limit. The default is zero. Always show the
+effective choices in the plan, including any persistent upload or deployment triggers.
+No module choice, cached preference, login or generic plan approval authorizes a write.
 
 ---
 
@@ -416,7 +376,7 @@ Stack: Expo · RevenueCat + Superwall · Cloudflare · Meta + TikTok · EN/DE
 Free vs Pro: <one line>
 Store: full basics + 3 screenshot sets, preview video EN/DE, review video, win-back
 Tests: 2 paywall designs × 2 yearly prices (4 variants) · Retention: $9.99/yr, every year
-Unattended: everything below except ↓
+Automatic: only the actions and exact targets listed in the private plan
 Your to-do at the end (known now): App Privacy "Publish" click if Apple asks for re-auth · Submit for review
 Spend: ~$3 of your $20 cap · Time: ~4–6 h
 ```

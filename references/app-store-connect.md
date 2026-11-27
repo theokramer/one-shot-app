@@ -4,7 +4,7 @@ Surfaces, in order of preference:
 
 1. `superwall asc …`: signed proxy, no JWT. Apps, subscription groups, subscriptions,
    prices, intro offers, availability, review screenshots, versions, builds, metadata.
-2. `python3 $SKILL/assets/scripts/asc.py call METHOD PATH [JSON]`: raw API with the `.p8`
+2. `python3 $SKILL/assets/scripts/asc.py call METHOD PATH [JSON]`: direct API with the `.p8` (writes require `--apply` after approval)
    (needs PyJWT + requests). Use it for anything the proxy lacks: preview videos, review
    attachments, custom product pages, win-back, promotional offers, offer codes, age
    rating, App Store version localizations. Subcommands: `attach-build`, `upload-preview`,
@@ -15,7 +15,7 @@ Surfaces, in order of preference:
 4. Claude in Chrome, only for things with no API (marked 🌐 below), using the
    phase-4 sign-in.
 
-Never submit for review. Leave it at "Ready for Review" / "Prepare for Submission" with
+Never submit for review. Asset uploads never delete an existing asset. If replacement is necessary, let the user review and remove it first. Leave it at "Ready for Review" / "Prepare for Submission" with
 everything green.
 
 ---
@@ -38,7 +38,7 @@ everything green.
 | App Privacy | answers in `store/APP_PRIVACY.md`, derived from the code, then 🌐 fill + **Publish** (needs the "Write to ASC" tick; if ASC asks for re-auth, put it on the to-do list) | must match the privacy manifest + policy + SDK manifests. Ads SDKs → tracking = yes for Device ID, Purchase History, Product Interaction |
 | Compliance forms | 🌐 AI-generated content (models, safeguards, reporting), Security; medical-device declaration (usually No) | answers drafted in `store/COMPLIANCE.md` |
 | Review notes + contact | asc.py `appStoreReviewDetails`: how to test, free vs Pro, AI + consent, ATT, languages, no login needed. Build the request in a local script that reads `reviewContact` directly from the library without printing its values. Keep any export outside Git or in ignored `review_information/`. The intake already asked for anything missing; never invent it | keep current with every build |
-| Build | upload, wait for `VALID`, attach: `asc.py attach-build <versionId> <buildNumber>` | bump the build number every upload |
+| Build | upload, wait for `VALID`, attach: `asc.py attach-build --apply <versionId> <buildNumber>` | bump the build number every upload |
 | Screenshots (one set) | 6.9" **1320×2868** required (6.5" 1242×2688 optional); iPhone only unless the app supports iPad. **No iPhone Duo screenshots** | see the style rules in launch-assets.md |
 
 ---
@@ -59,14 +59,14 @@ reply. Upload via `fastlane deliver` or asc.py `appScreenshotSets`.
   caption per scene, no long wait at the start, the viral moment in the first 3 s, and an
   end card.
 - One per language. Poster frame set by `previewFrameTimeCode`.
-- `asc.py upload-preview <file.mp4> <versionId> <locale> [--type IPHONE_67] [--frame 00:00:03:00]`
+- `asc.py upload-preview --apply <file.mp4> <versionId> <locale> [--type IPHONE_67] [--frame 00:00:03:00]`
 
 ### Review walkthrough video
 - One continuous take from a fresh install: onboarding → every permission prompt →
   paywall (switch plans so the legal text updates) → every feature → settings / restore.
 - Calm pace (2–3 s per screen), no frozen picker frames, about 3–5 min. Trim with
   mpdecimate, then check a contact sheet.
-- `asc.py upload-review-attachment <file.mp4> <versionId>`
+- `asc.py upload-review-attachment --apply <file.mp4> <versionId>`
 
 ### Header + search-results art (Asset Library) 🌐
 - Header 3840×1646 (safe area centred 1646×661), search results 3840×2560 (safe area

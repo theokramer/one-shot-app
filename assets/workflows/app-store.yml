@@ -14,18 +14,22 @@ concurrency:
 jobs:
   upload:
     name: Archive and upload
-    # Dormant until the user arms it:
-    #   gh variable set APP_STORE_DEPLOY_ENABLED --body true
-    if: ${{ vars.APP_STORE_DEPLOY_ENABLED == 'true' }}
+    # An unset or unknown mode disables all uploads.
+    if: >-
+      ${{ github.ref == 'refs/heads/main' &&
+          ((github.event_name == 'workflow_dispatch' && vars.APP_STORE_DEPLOY_MODE == 'manual') ||
+           (github.event_name == 'push' && vars.APP_STORE_DEPLOY_MODE == 'automatic')) }}
     runs-on: macos-26
     timeout-minutes: 45
-    # Add a required reviewer to this environment in repo settings to make every
-    # upload need a human click.
+    # Restrict this environment to main before adding secrets. Add a required reviewer
+    # when the user requires a separate approval per deployment.
     environment: app-store
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Show Xcode version
         run: xcodebuild -version
@@ -35,6 +39,7 @@ jobs:
           ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
         run: |
+          umask 077
           KEY_PATH="$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"
           printf '%s' "$ASC_PRIVATE_KEY_BASE64" | base64 --decode > "$KEY_PATH"
           chmod 600 "$KEY_PATH"
@@ -73,3 +78,9 @@ jobs:
           -authenticationKeyPath "$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"
           -authenticationKeyID "$ASC_KEY_ID"
           -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Remove temporary signing key
+        if: always()
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: rm -f -- "$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"

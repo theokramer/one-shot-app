@@ -136,6 +136,7 @@ feature bug. Fix it here.
 git init -b main
 git add -A
 git commit -m "Scaffold <AppName> iOS project"
+# Run after separate approvals for repo creation and the initial push.
 gh repo create <githubOwner>/<kebab>-ios --private --source=. --remote=origin --push
 ```
 

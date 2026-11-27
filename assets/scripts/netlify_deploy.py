@@ -5,9 +5,9 @@ App Review rejects a submission whose support or privacy URL does not resolve, s
 these pages cannot be "written but not deployed". This uses Netlify's zip-deploy
 endpoint directly — no CLI to install, no interactive login.
 
-Idempotent: the site is created on the first run and updated on every one after.
+Ship only a reviewed public build directory. Updating an existing site requires its ID.
 
-    netlify_deploy.py --dir AppStorePackage/website --site myapp-site
+    netlify_deploy.py --dir AppStorePackage/website --site myapp-site --apply
 """
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ import argparse
 import io
 import json
 import pathlib
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -24,6 +25,7 @@ SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 import sys as _sys, pathlib as _pl
 _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
 import paths  # noqa: E402
+from http_safety import open_request  # noqa: E402
 CONFIG = paths.CONFIG
 API = "https://api.netlify.com/api/v1"
 
@@ -54,7 +56,7 @@ def call(method: str, path: str, body=None, content_type="application/json"):
         headers={"Authorization": f"Bearer {token()}", "Content-Type": content_type},
     )
     try:
-        with urllib.request.urlopen(req, timeout=180) as resp:
+        with open_request(req, timeout=180) as resp:
             raw = resp.read()
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as exc:
@@ -71,9 +73,18 @@ def find_site(name: str):
 def zip_dir(directory: pathlib.Path) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        public_types = {".html", ".css", ".js", ".mjs", ".svg", ".png", ".jpeg", ".jpg",
+                        ".webp", ".ico", ".woff", ".woff2", ".avif", ".txt", ".xml"}
         for path in sorted(directory.rglob("*")):
-            if path.is_file() and not path.name.startswith("."):
-                archive.write(path, path.relative_to(directory).as_posix())
+            rel = path.relative_to(directory)
+            if path.is_symlink():
+                die("Deploy directory contains a symlink. Review and rebuild it.")
+            if any(part.startswith(".") or part in {"review_information", "frames", "recordings"} for part in rel.parts):
+                die("Deploy directory contains a hidden or private path. Review and rebuild it.")
+            if path.is_file():
+                if path.suffix.lower() not in public_types:
+                    die("Deploy directory contains an unexpected file type. Review and rebuild it.")
+                archive.write(path, rel.as_posix())
     return buffer.getvalue()
 
 
@@ -81,20 +92,32 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--dir", required=True, help="directory to deploy")
     parser.add_argument("--site", required=True, help="Netlify site name (becomes <name>.netlify.app)")
+    parser.add_argument("--apply", action="store_true", help="publish the approved public files")
+    parser.add_argument("--site-id", help="required when updating an existing site")
     args = parser.parse_args()
+    if not args.apply:
+        parser.error("publishing requires --apply after approval")
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", args.site):
+        parser.error("enter the exact Netlify site name")
+    if args.site_id and not re.fullmatch(r"[A-Za-z0-9_-]+", args.site_id):
+        parser.error("invalid Netlify site ID")
 
     directory = pathlib.Path(args.dir).resolve()
     if not (directory / "index.html").exists():
         die(f"{directory}/index.html not found")
 
-    site = find_site(args.site)
-    if site:
+    payload = zip_dir(directory)
+    if args.site_id:
+        site = call("GET", f"/sites/{args.site_id}")
+        if site.get("id") != args.site_id or site.get("name") != args.site:
+            die("Existing site does not match the approved site name and ID")
         print(f"site   reused   {site['name']}")
     else:
+        if find_site(args.site):
+            die("Site already exists. Verify its ID and pass --site-id to update it.")
         site = call("POST", "/sites", {"name": args.site})
         print(f"site   created  {site['name']}")
 
-    payload = zip_dir(directory)
     deploy = call("POST", f"/sites/{site['id']}/deploys", payload, content_type="application/zip")
 
     url = site.get("ssl_url") or site.get("url") or f"https://{args.site}.netlify.app"

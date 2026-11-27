@@ -27,7 +27,7 @@ list.
 | | |
 |---|---|
 | Tool | `superwall asc …` (signed proxy: subscriptions, offers, prices, availability, versions, builds, metadata), `assets/scripts/asc.py` (raw API with the `.p8` from config), `fastlane deliver` (metadata + screenshots), `xcrun altool` (upload) |
-| Login | `superwall login`; preflight `--fix` loads the `.p8` into the proxy |
+| Login | `superwall login`; use the direct API or have the user configure the proxy after approving the credential transfer |
 | Attended | **Creating the app record.** The public API refuses `POST /v1/apps`. Run `rc setup apple <rc-app-id> --project-id <id>` **in the user's terminal**. It signs into the Apple ID (password + 2FA by the user), creates the app record, and creates the in-app purchase key plus the ASC key for RevenueCat in one go. Give the exact store name to type. Then poll `superwall asc get "/v1/apps?filter[bundleId]=<bundle>"` until it exists. A Chrome sign-in to appstoreconnect.apple.com is also needed if any unattended Chrome item below is in the plan. |
 | Unattended Chrome | App Privacy questionnaire + **Publish**, compliance forms (AI-generated content, security), medical-device declaration (usually "No"), Asset Library header/search art, reading Resolution Center history |
 | User-only | Paid Apps Agreement + banking/tax (once per account), **Submit for Review** |
@@ -77,7 +77,7 @@ user is eligible. Show trial reminders only after a trial has actually started.
 |---|---|
 | Tool | `npx wrangler` (deploy, `secret put`, `d1`, `r2`, `types`), `cloudflare:workers-best-practices`, `cloudflare:wrangler` skills |
 | Login | `npx wrangler login` (browser OAuth, so the user clicks Allow) |
-| Attended | If the app needs OpenAI: the user runs `npx wrangler secret put OPENAI_API_KEY` themselves and pastes the key. The run never asks for keys in chat and never searches the disk for them. Without a key the Worker falls back to Workers AI, so the run doesn't stop. |
+| Attended | If the app needs OpenAI: the user runs `npx wrangler secret put OPENAI_API_KEY` themselves and pastes the key. The run never asks for keys in chat and never searches the disk for them. Workers AI requires its own approval and spending limit. |
 | Tick | Deploy to the web |
 | Notes | Worker names are permanent homes for secrets. Secrets can't be copied, so keep the name even after a rename (keep the old Worker name after an app rename). Rate-limit per device and cap daily spend (`DEVICE_DAILY`/`GLOBAL_DAILY`). |
 | Ref | [backend.md](backend.md) |
@@ -85,15 +85,13 @@ user is eligible. Show trial reminders only after a trial has actually started.
 ## Supabase
 
 `supabase` skill + `supabase-postgres-best-practices`; `mcp__supabase__*` or the CLI with
-the token from config. Login: `supabase login`, or MCP `/mcp` auth. Tick: Deploy to the
-web. Ref: [backend.md](backend.md).
+the token from config. Login: `supabase login`, or MCP `/mcp` auth. Requires a separate backend deployment grant. Ref: [backend.md](backend.md).
 
 ## GitHub repo + CI/CD
 
-`gh repo create --private`, secrets via `gh secret set` straight from config. The workflows
-come from `assets/workflows/`. SwiftUI uses them as-is. For Expo, add `npx expo prebuild`
-before the archive, or archive locally and keep CI to type-check + test. Tick: Deploy to
-the web. Ref: [cicd.md](cicd.md), [pr-mode.md](pr-mode.md).
+Create a private repo only with approval. Install unsigned CI first. Pushes, merging,
+credential sharing and upload automation are separate grants. For Expo, add the approved
+native prebuild step or use local archiving. See [CI/CD](cicd.md) and [PR mode](pr-mode.md).
 
 ## Localization
 

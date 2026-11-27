@@ -3,8 +3,8 @@
 <!-- demo:start -->
 <!-- demo:end -->
 
-**Pitch an iOS app, tick a few boxes, do the sign-ins, and walk away.** Hours later there's
-a finished, monetized app in App Store Connect, waiting only for you to press "Submit".
+**Build a monetized iOS app from a pitch.** Keep it local, review individual actions, or
+let the skill carry out an approved plan up to an App Store Connect build.
 
 It combines app scaffolding, monetization, store preparation and reusable implementation
 guidance in one workflow.
@@ -14,12 +14,10 @@ guidance in one workflow.
 1. **Pitch.** You describe the idea, optionally with a reference app or screenshot.
 2. **Tick boxes.** Clickable menus for the modules, how complete App Store Connect should be,
    languages, permissions and a spend cap. Almost no typing.
-3. **Connect everything.** It checks every tool, login and key up front, and does all the
-   steps that need you (Apple 2FA, Chrome sign-ins) while you're still there.
+3. **Connect selected services.** It verifies access only for the services you approve.
 4. **One plan, one "Go".**
-5. **Unattended.** It researches every funnel screen on Mobbin, builds the app, tests it
-   in its own simulator, fixes what it finds, makes the store assets, fills App Store
-   Connect, uploads the build and runs a review audit. You get a report and a short to-do list.
+5. **Build and verify.** It tests the app in a separate simulator and prepares assets.
+   External changes and uploads follow your approval choices. You get a report and a short to-do list.
 
 **Modules you can tick:**
 
@@ -31,14 +29,13 @@ guidance in one workflow.
 | Store | screenshot variations · preview video · review walkthrough video · header/search art · custom product pages |
 | Stack | Expo / React Native or native SwiftUI |
 
-Every app also gets support, privacy, terms and imprint (Impressum) pages, hosted for you.
+Prepare support, privacy, terms and imprint pages locally. Hosting follows your publication approval.
 
 ## Requirements
 
 - macOS with Xcode, plus [Claude Code](https://claude.com/claude-code) (the desktop app is
   best: it adds the simulator panel and the browser)
-- An Apple Developer Program membership, and an App Store Connect API key (team key, App
-  Manager access)
+- For App Store work, Apple Developer access and an App Store Connect key scoped to the task
 - Free accounts and CLIs: GitHub (`gh`), RevenueCat (`rc`), Superwall (`superwall`), and
   optionally Cloudflare (`wrangler`), Supabase, a Gemini API key, and Meta/TikTok ad accounts
 - **Plugins are your choice, none required**: on first run you pick your design research
@@ -47,13 +44,13 @@ Every app also gets support, privacy, terms and imprint (Impressum) pages, hoste
   generation (Gemini API, Sunra, local Blender/Pillow, or none) and music (ACE-Step, silent,
   or your own track). Every step works with any combination.
 
-You don't need to set these up in advance. The first run checks everything and prints the
-exact install and login commands for the modules you picked.
+The first run checks the tools and accounts needed for your choices. A local build does
+not require App Store Connect or GitHub credentials.
 
 ## Install
 
 ```bash
-git clone <this repo> ~/.claude/skills/one-shot-app
+git clone https://github.com/theokramer/one-shot-app.git ~/.claude/skills/one-shot-app
 ```
 
 Then in Claude Code: `/one-shot-app`, or just say "build me an app".
@@ -80,12 +77,18 @@ included in chat enters the assistant context. The skill starts with a redacted 
 and uses local scripts for private fields. Enter personal contact details with
 `profile.py set-private <field>` in your own terminal.
 
-## Guardrails
+## Autonomy and safety
 
-It never types your passwords, 2FA codes, tokens or payment details, never buys anything,
-never starts ads, never spends beyond your cap, and **never submits for App Review**.
-You stay responsible for what you publish: check the generated privacy policy, terms and
-imprint. They're drafts from your own data, not legal advice.
+The skill starts in **Local only**. Choose per-action approval or scoped autonomy before
+connecting accounts. You can turn individual actions off, approve each proposal, do it
+yourself, or authorize the assistant to run it automatically. Pushing a branch, merging a
+PR, deploying a site and uploading a build are separate choices. Automatic merges and
+uploads start disabled. The [permissions guide](references/permissions.md) explains the
+scope, cost limits, and human approvals.
+
+The skill runs inside your agent and uses the tools and credentials you give it. Keep
+credentials disconnected for local work. Use restricted credentials and provider approval
+gates to enforce limits when you connect services.
 
 ## Record your own run
 
@@ -108,4 +111,4 @@ Git history. It refuses to export into a nonempty directory so stale files canno
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+Created and maintained by [Theo Kramer](https://github.com/theokramer). MIT, see [LICENSE](LICENSE).

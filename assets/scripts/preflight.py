@@ -2,10 +2,10 @@
 """Phase 4 gate: prove every tool, login and key the ticked modules need.
 
 The failure this prevents: the run gets two hours in, hits a missing login or key, and
-stops while the user is away. Everything is checked with a real call, not a presence check.
+stops while the user is away. Service checks are read-only and limited to explicitly selected modules.
 
     preflight.py --modules core,asc,revenuecat,superwall,cloudflare --stack expo
-    preflight.py --modules all --fix        # --fix also loads the ASC key into the Superwall proxy
+    preflight.py --modules core           # local checks only
 
 Modules: core, github, asc, revenuecat, superwall, cloudflare, supabase, gemini, netlify,
          meta, tiktok, localization   ("all" = every module)
@@ -28,6 +28,7 @@ import urllib.request
 import sys as _sys, pathlib as _pl
 _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
 import paths  # noqa: E402
+from http_safety import open_request  # noqa: E402
 
 SKILL_DIR = paths.SKILL_DIR
 CONFIG = paths.CONFIG
@@ -77,7 +78,6 @@ def check_core(cfg, stack):
     need_tool("python3", "brew install python")
     need_tool("ffmpeg", "brew install ffmpeg")
     pymod("PIL", "Pillow")
-    pymod("jwt", "PyJWT cryptography")
     if stack == "expo":
         if need_tool("node", "brew install node   (Node 20+)"):
             code, out = run(["node", "--version"])
@@ -94,12 +94,6 @@ def check_core(cfg, stack):
         record(WARN, "disk", f"{free:.1f} GB free", "user", "Tight for archive + videos; clear DerivedData")
     else:
         record(OK, "disk", f"{free:.0f} GB free")
-    if cfg is None:
-        return
-    dev = cfg.get("developer") or {}
-    for f, hint in [("appleTeamID", "ASC → Membership → Team ID (not the certificate's personal ID)"),
-                    ("bundleIdPrefix", "e.g. com.yourname")]:
-        record(OK if dev.get(f) else FAIL, f"config developer.{f}", "" if dev.get(f) else "empty", "config", hint)
 
 
 # --- services ----------------------------------------------------------------
@@ -111,13 +105,7 @@ def check_github(cfg):
     if code != 0:
         record(FAIL, "github login", "not logged in", "login", "gh auth login")
         return
-    scopes = next((line for line in out.splitlines() if "Token scopes" in line), "")
-    missing = [s for s in ("repo", "workflow") if f"'{s}'" not in scopes]
-    if missing:
-        record(FAIL, "github scopes", "missing " + ", ".join(missing), "login",
-               "gh auth refresh -h github.com -s repo,workflow")
-    else:
-        record(OK, "github login", "repo + workflow")
+    record(OK, "github login", "authenticated")
     if cfg is not None and not (cfg.get("developer") or {}).get("githubOwner"):
         record(FAIL, "config developer.githubOwner", "empty", "config", "Your GitHub user or org")
 
@@ -131,7 +119,7 @@ def asc_jwt(cfg):
                       algorithm="ES256", headers={"kid": c["keyId"], "typ": "JWT"})
 
 
-def check_asc(cfg, fix):
+def check_asc(cfg, check_proxy=False):
     if cfg is None:
         return
     c = cfg.get("appStoreConnect") or {}
@@ -143,12 +131,13 @@ def check_asc(cfg, fix):
     if not p8.exists():
         record(FAIL, "asc .p8", "file not found at privateKeyPath", "config", "Point privateKeyPath at AuthKey_*.p8")
         return
-    if "/.git/" in str(p8.resolve()) or (p8.parent / ".git").exists():
+    if any((parent / ".git").exists() for parent in p8.resolve().parents):
         record(FAIL, "asc .p8", "lives inside a git repo", "config", "Move it outside any repository")
+        return
     try:  # the direct API, which asc.py uses
         req = urllib.request.Request("https://api.appstoreconnect.apple.com/v1/apps?limit=1",
                                      headers={"Authorization": "Bearer " + asc_jwt(cfg)})
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with open_request(req, timeout=30) as r:
             json.load(r)
         record(OK, "asc api (.p8)", "key accepted")
     except urllib.error.HTTPError as exc:
@@ -158,19 +147,11 @@ def check_asc(cfg, fix):
                "python3 -m pip install --user --break-system-packages PyJWT cryptography")
     except Exception as exc:  # noqa: BLE001
         record(WARN, "asc api (.p8)", str(exc)[:80])
-    if not shutil.which("superwall"):  # the signed proxy
-        record(FAIL, "superwall cli", "not installed", "install", "npm i -g superwall")
-        return
-    code, out = run(["superwall", "asc", "get", "/v1/apps?limit=1", "--json"], timeout=90)
-    if code == 0 and '"data"' in out:
-        record(OK, "asc proxy", "connected")
-    elif fix:
-        code, out = run(["superwall", "asc", "keys", "set", "--key-id", c["keyId"], "--issuer", c["issuerId"],
-                         "--key-file", str(p8), "--name", "one-shot-app"], timeout=90)
-        record(OK if code == 0 else FAIL, "asc proxy", "connected (just now)" if code == 0 else out[:140], "login",
-               "superwall login, then re-run with --fix")
-    else:
-        record(FAIL, "asc proxy", "not connected", "login", "re-run preflight with --fix (after superwall login)")
+    if check_proxy:
+        code, out = run(["superwall", "asc", "get", "/v1/apps?limit=1", "--json"], timeout=90)
+        record(OK if code == 0 and '"data"' in out else FAIL, "asc proxy",
+               "checked existing connection", "login",
+               "Use the direct API or connect the proxy yourself after approving the transfer")
     if not shutil.which("fastlane"):
         record(WARN, "fastlane", "not installed (bulk metadata/screenshots)", "install", "brew install fastlane")
     record(INFO, "asc app record", "created in the attended block", "user",
@@ -229,7 +210,7 @@ def check_gemini(cfg):
     req = urllib.request.Request("https://generativelanguage.googleapis.com/v1beta/models",
                                  headers={"x-goog-api-key": key})
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with open_request(req, timeout=30) as resp:
             json.load(resp)
         record(OK, "gemini", "key accepted (spend cap shows on the first generation)")
     except urllib.error.HTTPError as exc:
@@ -247,7 +228,7 @@ def check_netlify(cfg):
         return
     req = urllib.request.Request("https://api.netlify.com/api/v1/user", headers={"Authorization": f"Bearer {token}"})
     try:
-        with urllib.request.urlopen(req, timeout=30):
+        with open_request(req, timeout=30):
             record(OK, "netlify", "token accepted")
     except Exception as exc:  # noqa: BLE001
         record(FAIL, "netlify", str(exc)[:80], "config", "Regenerate the token")
@@ -352,14 +333,12 @@ def report() -> int:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--modules", default="core,github,asc,revenuecat,superwall")
+    ap.add_argument("--modules", default="core")
     ap.add_argument("--stack", choices=["expo", "swiftui"], default="expo")
-    ap.add_argument("--fix", action="store_true", help="load the ASC key into the Superwall proxy")
+    ap.add_argument("--check-asc-proxy", action="store_true", help="read-only check of an existing approved Superwall proxy connection")
     a = ap.parse_args()
     mods = set(ALL if a.modules == "all" else [m.strip() for m in a.modules.split(",") if m.strip()])
     mods.add("core")
-    if mods & {"revenuecat", "superwall"}:
-        mods.add("asc")
 
     for msg in paths.ensure_home():
         print("·", msg)
@@ -376,7 +355,7 @@ def main():
 
     print(f"one-shot-app preflight  modules={','.join(sorted(mods))}  stack={a.stack}\n")
     check_core(cfg, a.stack)
-    checks = {"github": lambda: check_github(cfg), "asc": lambda: check_asc(cfg, a.fix),
+    checks = {"github": lambda: check_github(cfg), "asc": lambda: check_asc(cfg, a.check_asc_proxy),
               "revenuecat": check_revenuecat, "superwall": check_superwall,
               "cloudflare": check_cloudflare, "supabase": lambda: check_supabase(cfg),
               "gemini": lambda: check_gemini(cfg), "netlify": lambda: check_netlify(cfg)}

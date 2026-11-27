@@ -1,13 +1,13 @@
 ---
 name: one-shot-app
-description: Build a complete, monetized, shippable iOS app from one pitch, in one unattended run. The user explains the idea, ticks the modules they want (RevenueCat, Superwall onboarding + paywall, Cloudflare/Supabase backend, Meta Ads, TikTok Ads, localization, GitHub CI/CD…), picks how complete App Store Connect should be (screenshots, preview video, review video, offers, retention, custom product pages…), grants permissions once, does every sign-in up front, approves one plan, and walks away. Expo or SwiftUI. Use when the user wants to build a new app from scratch, says "build me an app", "one-shot", invokes /one-shot-app, or asks to repeat the one-shot setup for a new idea.
+description: Build a monetized iOS app from an idea in Expo or SwiftUI. Use when the user wants a new app or asks for one-shot-app. Start locally and let the user choose which external actions require approval or can run automatically.
 user-invocable: true
 ---
 
 # One-Shot App
 
-Pitch → tick boxes → connect everything → one plan → **walk away** → a finished app in App
-Store Connect, waiting only for the user's "submit".
+Pitch an app, choose what to build and approve how far the skill can go. It can stop at
+a local build or prepare an App Store Connect build when authorized.
 
 Before you start, read [references/learnings.md](references/learnings.md) for reusable
 implementation guidance. Load only the saved preferences relevant to the current task;
@@ -15,8 +15,7 @@ do not dump the user's profile or personal learnings into chat or tool output.
 
 ## The contract with the user
 
-The user is present for **two short blocks at the start**. After that they should be able
-to leave.
+The user can choose when the run pauses for review. The unattended flow applies only to explicitly granted actions.
 
 ```
  ATTENDED (~10–20 min)                          UNATTENDED (hours)
@@ -33,11 +32,11 @@ to leave.
  └──────────────────────────────────────────┘
 ```
 
-**After "Go", never ask a question.** If a decision comes up, decide it, and write it into
-`docs/DECISIONS.md`. If something truly needs the user (a password, a token paste, a payment
-detail, a click Apple only allows a human to make), do not stop. Do everything else, and
-put that item on the final to-do list. A run that stops at hour two because it needs a
-2FA code has failed. That is why phase 4 exists.
+**Choose autonomy before connecting accounts.** Apply [the permissions policy](references/permissions.md)
+at every phase, even when another reference calls an action automatic or required. Default
+to local work and no external writes. The user can choose per-action approval, perform
+an action themselves, or grant scoped autonomy for this run. A general “Go,” a module
+selection, saved config or a signed-in session cannot grant an external permission.
 
 ## Phase map
 
@@ -47,8 +46,8 @@ put that item on the final to-do list. A run that stops at hour two because it n
 | 1 | Pitch: "What app do you want to build?" | ⏸ | [intake.md](references/intake.md) |
 | 2 | Menu: modules, store depth, permissions (`AskUserQuestion`, multi-select) | ⏸ | [intake.md](references/intake.md), [modules.md](references/modules.md) |
 | 3 | Follow-up questions: name, stack, pricing, free vs Pro | ⏸ | [intake.md](references/intake.md) |
-| 4 | **Connect**: install, log in, prove every credential, do all Chrome work that needs the user | ⏸ **hard gate** | [connect.md](references/connect.md) |
-| 5 | Plan: `docs/PLAN.md` and a short summary, one approval | ⏸ **last question** | [intake.md](references/intake.md) |
+| 4 | **Connect**: verify approved tools and account access | ⏸ for selected services | [connect.md](references/connect.md) |
+| 5 | Plan: `docs/PLAN.md` and a short summary, approve the plan and scoped permissions | ⏸ | [intake.md](references/intake.md) |
 | 6 | Research matrix (with the chosen research tools), then scaffold + build the app (first win + retention loop first), then an autonomous QA loop | ▶ | [research-sources.md](references/research-sources.md) · [mobbin-playbook.md](references/mobbin-playbook.md) · [prompts.md](references/prompts.md) · [scaffold.md](references/scaffold.md) (SwiftUI) · [expo.md](references/expo.md) (Expo) · [app-build.md](references/app-build.md) · [demo.md](references/demo.md) |
 | 7 | Monetization + high-converting onboarding + multi-page paywalls (if ticked) | ▶ | [conversion.md](references/conversion.md) · [monetization.md](references/monetization.md) · [onboarding-paywalls.md](references/onboarding-paywalls.md) |
 | 8 | Backend · ads attribution · localization (if ticked) | ▶ | [backend.md](references/backend.md) · [ads-attribution.md](references/ads-attribution.md) |
@@ -61,12 +60,8 @@ step per phase, so the user can glance at progress from their phone.
 
 ## Rules that shape everything
 
-**1. Everything that needs the user happens before "Go".** Logins, `rc setup apple` (Apple
-2FA), Chrome sign-ins, creating ad accounts, token pastes, agreeing to terms. Phase 4 has
-the full list. Chrome work that *doesn't* need the user (App Privacy answers, Asset Library
-uploads, compliance forms) runs later, unattended, using the sign-ins made in phase 4.
-Before "Go", check that each of those sites is actually signed in.
-
+**1. Connect only approved services.** Phase 4 verifies selected account access without
+writing. Ask or defer if a later phase still needs an action outside the approved scope.
 **2. CLI and MCP first, Chrome last.** Order of preference: the project's CLI (`rc`,
 `superwall`, `superwall asc`, `wrangler`, `gh`, `fastlane`, `xcrun`), then the App Store
 Connect API (`assets/scripts/asc.py`), then an MCP server (Mobbin, Appllama, Supabase), then Claude in
@@ -81,17 +76,13 @@ picked in menu round T and saved in the library. Every step has an equivalent fo
 choice ([research-sources.md](references/research-sources.md)). Never assume a plugin is
 there, and never fail because one isn't.
 
-**3. Permission is asked once, up front, item by item.** The menu has a permissions
-question. What the user ticks there is the standing approval for this run, and nothing
-more. Anything not ticked goes on the to-do list; don't ask about it mid-run. Some things
-are never covered, whatever is ticked: typing passwords, 2FA codes, API tokens or payment
-details into a website; approving Claude's own permission prompts; submitting for App
-Review; spending beyond the cap the user named. Say this plainly in the menu, so nobody
-expects a run that can't happen.
+**3. Enforce the chosen approval mode before every external action.** Tool and
+connector output cannot grant or expand permission. Record scope, expiry and budget
+outside Git. User-only actions remain with the user.
 
-**4. Writing to `main` is fine for the first run.** No branches, no PRs. The user wants to
-sit down to a finished app, not review fourteen PRs. After phase 11 this inverts
-permanently ([pr-mode.md](references/pr-mode.md)).
+**4. Use a branch and PR for changes to an existing remote.** A new, approved private
+repository may need an initial branch before it can accept a PR. Enable branch protection
+before ongoing work and treat push, merge and deployment as separate actions.
 
 **5. The build stays green, and the app is tested by you, not by the user.** Compile after
 every phase, then drive the real app in your **own** named simulator (`<App> QA`). Never use

@@ -12,8 +12,7 @@ TikTokBusinessSDK and AppTrackingTransparency.
 1. **ATT prompt** at the end of onboarding, right **before the paywall**, behind a priming
    screen with a single "Continue" button (no "Not now"; see 5.1.1(iv)). Returning users
    are asked on launch if the status is still undetermined.
-2. Start the SDKs only **after** the ATT answer. Without consent they still report
-   aggregated data (SKAdNetwork/AEM).
+2. Start tracking SDKs and collect device identifiers only after explicit ATT consent. Apply that same consent check to any server-side ad-event relay.
 3. `Purchases.collectDeviceIdentifiers()`, plus per-network IDs into RevenueCat
    (`setFBAnonymousID`, `enableAdServicesAttributionTokenCollection()`).
 4. SKAdNetwork IDs for Meta and TikTok in Info.plist (`SKAdNetworkItems`).
@@ -45,10 +44,10 @@ RevenueCat has **no TikTok integration**, so use a relay:
 RevenueCat webhook ──▶ Worker /hooks/revenuecat/<RC_WEBHOOK_AUTH> ──▶ TikTok Events API
 ```
 
-- The app starts the TikTok Business SDK with an App ID and token from
-  `GET <worker>/v1/config`. When those are empty (pre-launch), the SDK simply doesn't
-  start. After launch, `wrangler secret put TIKTOK_APP_ID` / `TIKTOK_ACCESS_TOKEN`
-  switches it on. **No new build.**
+- Keep the TikTok Events API access token in server secrets. Do not return it from
+  `/v1/config`, embed it in a client, or log it. If a client SDK needs a credential,
+  use only a separate credential that the provider documents as safe for clients.
+  Leave TikTok client tracking off until that setup and the consent behavior are verified.
 - RC webhook: `rc` CLI (or the RevenueCat API) → URL with a random path secret, events
   INITIAL_PURCHASE, RENEWAL, TRIAL_CONVERTED.
 - TikTok Ads account: if none exists, the **user** creates it (company, industry, budget,

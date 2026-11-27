@@ -6,8 +6,7 @@ Build a backend **only** if the spec requires at least one of:
 
 - **Accounts or cross-device sync** — the user's data must outlive the device.
 - **Server-side AI or a third-party API** — because the credential cannot ship in the
-  binary. This is the most common trigger. One shipped app needed it purely to keep an AI provider key
-  off the device.
+  binary.
 - **Shared or social data** — leaderboards, feeds, anything one user's device writes and
   another reads.
 - **Server-validated entitlements** beyond what RevenueCat already gives you (rare —
@@ -36,7 +35,7 @@ site/                    Worker "<kebab>"      → support / privacy / terms
 ```
 
 - **AI**: OpenAI first if `OPENAI_API_KEY` is set (the user runs `wrangler secret put`), with
-  **Workers AI as automatic fallback**, so the app works without any key. The model and
+  **Workers AI as an optional fallback**, separately approved with its own cost limit. The model and
   base URL are vars, not code.
 - **Device identity**: `/v1/device` issues an HMAC-signed device token; the app keeps it in
   the keychain and uses the same ID as the RevenueCat app user ID (`Purchases.logIn`).
@@ -44,7 +43,7 @@ site/                    Worker "<kebab>"      → support / privacy / terms
   device ID (cache briefly). Free limits are enforced per device per day (402 when the
   limit is hit), with a global daily cap so a bug can't burn the budget.
 - **`/v1/config`**: runtime switches the app reads on launch (TikTok IDs, feature flags,
-  minimum version), so post-launch changes need no build.
+  minimum version), so post-launch changes need no build. This response is public: never include provider tokens, user data or webhook secrets.
 - **Privacy**: delete uploads after processing, results after a short TTL, and state both
   in the privacy policy. Pass the user's language through (`accept-language` / `x-lang`).
 - Before going public, put App Attest in front of `/v1/device` (or note it in
