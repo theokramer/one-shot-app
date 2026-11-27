@@ -147,3 +147,10 @@ unrelated chat logs.
 - Claude never types tokens or payment details, even with permission. Hand the user the
   exact field.
 - Ad SDKs mean App Privacy has tracking = yes, plus an ATT prompt.
+
+## Paywalls with three plans felt crowded and needed scrolling
+A run shipped yearly + monthly + weekly on every paywall, plus four perks and a three-step
+trial timeline. On a 6.1" phone the plans and CTA fell below the fold. Rule now: exactly
+two plans (yearly + weekly or yearly + monthly), at most three one-line perks, a two-row
+timeline, and the whole paywall fits one screen without scrolling (tiny devices excepted).
+See [conversion.md §3](conversion.md#3-paywalls-that-convert-and-pass-review).

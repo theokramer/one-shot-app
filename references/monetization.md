@@ -143,7 +143,7 @@ a different group for a tested price.
 |---|---|---|---|---|
 | Default yearly | `<bundle>.pro.yearly` | default (e.g. $39.99) | every paywall, variant A | 1 (highest) |
 | Test yearly B / C | `<bundle>.pro.yearly.b`, `.c` | e.g. $49.99 / $29.99 | price-test variants only | same level as default |
-| Weekly | `<bundle>.pro.weekly` | e.g. $6.99 | all paywalls | 1 |
+| Weekly or monthly | `<bundle>.pro.weekly` / `.monthly` | e.g. $6.99 / $9.99 | the one short plan next to yearly (a paywall shows two plans, never three) | 1 |
 | Retention yearly ("that price, every year") | `<bundle>.pro.yearly.retention` | e.g. $9.99 | retention surfaces only | lowest level |
 
 Set it up in all three systems:
