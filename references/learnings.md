@@ -54,19 +54,21 @@ unrelated chat logs.
 - Product Page Optimization only opens after launch. Custom product pages work before.
 - Screenshot sets are moving to an "asset library" model (API 4.5+). If a set endpoint
   answers oddly, read the current docs.
-- Generative-AI apps: exclude mainland China from availability. `POST /v2/appAvailabilities`
-  with every territory inline (`available: false` only for `CHN`) works in one call.
+- Read existing storefront availability and show the exact additions and removals for
+  approval before applying them. Preserve unrelated exclusions and future-territory settings.
+  Use the ordinary [App Store availability workflow](https://developer.apple.com/help/app-store-connect/manage-your-apps-availability/manage-availability-for-your-app-on-the-app-store/)
+  unless the user has separately approved a pre-order.
 - The store name limit is 30 characters, including the ": benefit" part. Check the length of
   every name option before offering it, in every language.
 - Adding an `appInfoLocalization` auto-creates the matching `appStoreVersionLocalization`, so
   a follow-up POST for the version text returns 409. Read, then PATCH.
 - Copyright (`appStoreVersions.copyright`) and Content Rights (web UI → App Information) are
   easy to miss and block submission. Set both in the baseline.
-- The newer web UI has no screenshot well on the version page: screenshots and previews are
-  API-only, and the "Header and Search Results" tabs take direct file uploads. A custom
-  product page cannot be made the default; to promote one, replace the default page's set.
-- Decide the default screenshot set **before** uploading: replacing it means deleting
-  screenshots (sets hold at most 10), and write tools may block deletes.
+- Upload screenshots and previews through Product Page Information, Asset Library, or a
+  supported API. A custom product page stays separate. To switch the default screenshot
+  set, change the placements on the default page and keep existing library assets.
+  [Apple's asset guide](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-your-app-store-assets)
+  covers uploads, placements, and poster frames.
 - Win-back offers and offer codes need an **approved** subscription (409
   `NON_APPROVED_SUBSCRIPTION`; win-back `startDate` must also be at least two days out).
   Promotional offers can be created before review. Queue the rest for launch day.
@@ -79,10 +81,11 @@ unrelated chat logs.
 
 - `rc` CLI only, `--project-id` always, never switch the default project. "Offering has no
   attached paywall" from `rc offerings verify` is expected.
-- Apple server notifications → RevenueCat (V2): the RC app page may only offer "Reveal" for
-  the URL (no apply button) and `rc setup apple` may not set it. The URL is a secret, so the
-  user reveals it and pastes it into App Store Connect → App Information → Production Server
-  URL in the attended block. Check it before "Go".
+- Apple server notifications → RevenueCat (V2): `rc setup apple` may leave the routes
+  unset. Check both Production and Sandbox with the user. For an approved direct setup,
+  configure both in App Store Connect. If a route already has a consumer, agree on forwarding
+  before changing it. Follow the [RevenueCat setup guide](https://www.revenuecat.com/docs/platform-resources/server-notifications/apple-server-notifications)
+  and keep the URL out of chat and logs.
 - `rc` subcommand `--help` can print the root help. Find flags from the error messages
   (`--store-id is required`, `app ID is required`) or `rc schema`; grants and attaches take
   positional IDs (`rc customers grant <customer> <entitlement> --duration weekly`).
@@ -101,16 +104,17 @@ unrelated chat logs.
 - The Superwall libcel signature collision on archive is harmless: write the archive
   `Info.plist` by hand (the release script does).
 - The Apple **team** ID (ASC → Membership) ≠ the personal ID shown on the signing certificate.
-- Keep ≥ 15 GB free disk. Clear the app's DerivedData and old recordings. Check disk and swap
-  before every heavy job; an archive plus local music generation on 18 GB RAM once pushed
-  swap to 20 GB and the disk under 2 GB. Generate music before builds, alone.
+- Keep ≥ 15 GB free disk. Clear the app's DerivedData and old recordings. Check free disk
+  space and memory pressure before heavy jobs. Generate music and archive sequentially
+  to avoid concurrent swap growth.
 - Simulator Release builds: `CODE_SIGNING_ALLOWED=NO` strips the keychain entitlement, so
   secure storage fails and every API call looks "offline". Use `CODE_SIGN_IDENTITY=-
   CODE_SIGNING_REQUIRED=NO`. Map only network failures to "offline" in the API client.
 - `expo run:ios` re-runs `pod install` without a UTF-8 locale and dies on CDN hiccups. Export
   `LANG=en_US.UTF-8`, run `pod install` once yourself, then build with `xcodebuild`.
 - A Debug build without expo-dev-client asks Metro on port 8081. For another port, set
-  `defaults write <bundle> RCT_jsLocation 127.0.0.1:<port>` on the simulator.
+  `xcrun simctl spawn '<SIMULATOR_UDID>' defaults write '<BUNDLE_ID>' RCT_jsLocation '127.0.0.1:<PORT>'`
+  and relaunch the app on that simulator.
 - Don't copy `node_modules` (or `.git`) from another project to save time; it breaks module
   resolution. Do a clean install.
 - `expo-secure-store` adds `NSFaceIDUsageDescription` unless configured with

@@ -30,7 +30,7 @@ everything green.
 | Subscription localizations | `superwall asc localizations add` for every language | name + description, ≤ 45 chars |
 | Subscription review screenshot | `superwall asc screenshots upload`: a real capture of the paywall | missing → products stay "Missing Metadata" |
 | First subscription | must be submitted **with the app version**: `FIRST_SUBSCRIPTION_MUST_BE_SUBMITTED_ON_VERSION` | don't try to submit it alone; attach it to the version when the user submits |
-| Availability | all territories; **exclude mainland China for generative-AI apps** (Apple needs a Chinese government licence) | |
+| Availability | read the current storefronts and set only the countries or regions approved for this app. Check applicable requirements before proposing mainland China for a generative-AI app | preserve any existing exclusions and future-territory settings unless the user explicitly approves a change |
 | Metadata per locale | `fastlane/metadata/<locale>/` → deliver: name (30), subtitle (30), promo text (170), description (paid features + trial + renewal terms + Terms/Privacy links, else 2.3.2), keywords (100, no spaces, no repeats of name/subtitle), What's New, URLs | the first 3 lines of the description carry the conversion |
 | Copyright, content rights | `appStoreVersions.copyright` via the API; Content Rights in the web UI (App Information) | both block submission when empty |
 | Category, age rating | asc.py `ageRatingDeclarations`; deliver `--app_rating_config_path` | `socialMedia` key needed |
@@ -54,18 +54,19 @@ final report shows a contact sheet of every set so the user can switch the defau
 reply. Upload via `fastlane deliver` or asc.py `appScreenshotSets`.
 
 ### App preview video
-- 886×1920 (or 1080×1920) H.264, 30 fps, **15–30 s** (Apple's limit), AAC audio track
-  (silent is fine; music per the round-T choice).
+- Use the [accepted resolution for the target display](https://developer.apple.com/help/app-store-connect/reference/app-information/app-preview-specifications/),
+  such as 886×1920 portrait for modern iPhones. Use H.264 at 30 fps, **15–30 s**, and an
+  AAC stereo track (silent is fine; music per the round-T choice).
 - **The real app, not the onboarding.** Brisk but readable: 2–3 s per scene, a short
-  caption per scene, no long wait at the start, the viral moment in the first 3 s, and an
-  end card.
-- **Layout: the app video sits inside a device frame on top of a colorful background, and
-  the captions sit on the background, never on top of the video.** Use the app's brand
-  colour or a soft gradient from its palette (one background for the whole video, or one per
-  scene from the same family). Typical split: caption in the top ~25 % on the background,
-  framed app video below it, fully visible. The UI stays readable and uncovered.
+  caption per scene, no long wait at the start, the viral moment in the first 3 s, and a
+  closing caption over app footage.
+- **Layout: use full-screen captures of the app.** Add short explanatory captions where
+  they leave controls and content readable. See [App Review guideline 2.3.4](https://developer.apple.com/app-store/review/guidelines/#accurate-metadata).
+  Export the device frame and colorful background as a separate social promo when requested.
 - One per language. Poster frame set by `previewFrameTimeCode`.
 - `asc.py upload-preview --apply <file.mp4> <versionId> <locale> [--type IPHONE_67] [--frame 00:00:03:00]`
+- If the API workflow is unavailable, use the approved browser flow through Product Page
+  Information or Asset Library in [App Store Connect](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-your-app-store-assets).
 
 ### Review walkthrough video
 - One continuous take from a fresh install: onboarding → every permission prompt →

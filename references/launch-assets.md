@@ -23,8 +23,8 @@ the assets well.
 
 Order and headlines follow [conversion.md §5](conversion.md#5-the-app-store-page-that-converts)
 and the [headline brief](prompts.md#5-screenshot-headline-brief). The preview video follows the
-[storyboard](prompts.md#6-preview-video-storyboard): the app video in a device frame on a
-colorful background, captions on the background rather than on the video.
+[storyboard](prompts.md#6-preview-video-storyboard): full-screen app captures with brief
+explanatory captions. Use the colorful device frame layout in a separate social promo.
 
 
 1. **Only real app captures**, from your QA simulator with a clean status bar and
