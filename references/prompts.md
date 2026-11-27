@@ -125,6 +125,8 @@ The chosen design skill (e.g. `appllama-app-design-skill`) sets the quality bar;
   0–3 s the win (no logo intro) · 3–8 s how · 8–18 s three features, one caption each ·
   18–23 s the result/progress · 23–25 s end card. Real app only, no onboarding screens.
   Captions ≤ 5 words, inside the safe area. Music: per round T (ACE-Step <mood>, <bpm> · silent · own track).
+  Layout: app video in a device frame on a colorful brand background; captions on the
+  background above the phone, never over the video.
 </preview_storyboard>
 ```
 

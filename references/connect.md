@@ -81,6 +81,7 @@ your own (never take "done" on faith):
 | 5 | **User pastes** the Meta client token into RevenueCat → app → Integrations → Meta Ads (App Events API) and into `wrangler secret put META_CLIENT_TOKEN` if the server needs it | user | `rc` shows the integration; the Worker config endpoint responds |
 | 6 | Chrome: sign in to **ads.tiktok.com** (TikTok ticked). If there's no ads account, the **user** completes company/industry/payment | user | Claude sees Events Manager |
 | 7 | OpenAI key (if wanted): user runs `npx wrangler secret put OPENAI_API_KEY` | user | `wrangler secret list` shows the name |
+| 7b | Apple server notifications → RevenueCat: **user** reveals the URL on the RC app page and pastes it into ASC → App Information → Production Server URL (it is a secret, so Claude never types it) | user | ASC App Information shows a production URL |
 | 8 | Paid Apps Agreement is active (ASC → Business) | user, only if it isn't | asc.py / Chrome check |
 | 9 | Simulator panel attach, to accept device access once | Claude | screenshot works |
 
