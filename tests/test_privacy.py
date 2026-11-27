@@ -55,7 +55,7 @@ class PackagingTests(unittest.TestCase):
 
     def test_source_archive_excludes_private_files_media_and_directory_links(self):
         for name in (".env", ".env.production", "learnings.local.md", "review_information/contact.txt",
-                     "assets/scripts/.env", "assets/demo/raw.jpg", "assets/demo/demo.mp4", "assets/scripts/private.pem"):
+                     "assets/scripts/.env", "assets/media/raw.jpg", "assets/media/clip.mp4", "assets/scripts/private.pem"):
             self.write(name, "private fixture")
         self.write("assets/scripts/helper.py", "print('ok')\n")
         (self.home / "private.md").write_text("Private fixture")
@@ -207,30 +207,6 @@ class SetupTests(unittest.TestCase):
             setup.detect()
         self.assertNotIn("Private Fixture Identity", out.getvalue())
         self.assertTrue(json.loads(out.getvalue())["gitIdentityConfigured"])
-
-
-class RecorderTests(unittest.TestCase):
-    def test_default_and_invalid_arguments_never_capture(self):
-        script = ROOT / "assets/demo/record_timelapse.sh"
-        for args in ([], ["--window-id", "0", "/tmp/unused"], ["--window-id", "12", "/tmp/unused", "0"]):
-            run = subprocess.run(["bash", str(script), *args], capture_output=True, text=True)
-            self.assertEqual(run.returncode, 2)
-
-    def test_selected_window_capture_stops_on_failure_without_fallback(self):
-        with tempfile.TemporaryDirectory() as td:
-            base = pathlib.Path(td)
-            stub = base / "screencapture"
-            log = base / "args"
-            stub.write_text('#!/bin/bash\nprintf "%s\\n" "$@" > "$CAPTURE_ARGS"\nexit 1\n')
-            stub.chmod(0o755)
-            env = dict(os.environ, PATH=str(base) + os.pathsep + os.environ["PATH"], CAPTURE_ARGS=str(log))
-            run = subprocess.run(["bash", str(ROOT / "assets/demo/record_timelapse.sh"), "--window-id", "123", str(base / "frames")],
-                                 env=env, capture_output=True, text=True)
-            self.assertEqual(run.returncode, 1)
-            args = log.read_text().splitlines()
-            self.assertEqual(args[args.index("-l") + 1], "123")
-            self.assertNotIn("-D", args)
-            self.assertIn("stopped", run.stderr)
 
 
 if __name__ == "__main__":

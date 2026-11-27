@@ -1,8 +1,5 @@
 # one-shot-app: a Claude Code skill
 
-<!-- demo:start -->
-<!-- demo:end -->
-
 **Build a monetized iOS app from a pitch.** Keep it local, review individual actions, or
 let the skill carry out an approved plan up to an App Store Connect build.
 
@@ -90,11 +87,6 @@ scope, cost limits, and human approvals.
 The skill runs inside your agent and uses the tools and credentials you give it. Keep
 credentials disconnected for local work. Use restricted credentials and provider approval
 gates to enforce limits when you connect services.
-
-## Record your own run
-
-`assets/demo/` has a time-lapse recorder and an assembler that turns a run into a short
-video and GIF. See [assets/demo/README.md](assets/demo/README.md).
 
 ## Sharing a modified copy
 
