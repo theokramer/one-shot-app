@@ -30,8 +30,9 @@ everything green.
 | Subscription localizations | `superwall asc localizations add` for every language | name + description, ≤ 45 chars |
 | Subscription review screenshot | `superwall asc screenshots upload`: a real capture of the paywall | missing → products stay "Missing Metadata" |
 | First subscription | must be submitted **with the app version**: `FIRST_SUBSCRIPTION_MUST_BE_SUBMITTED_ON_VERSION` | don't try to submit it alone; attach it to the version when the user submits |
-| Availability | all territories; **exclude mainland China for generative-AI apps** (Apple needs a Chinese government licence) | |
+| Availability | read the current storefronts and set only the countries or regions approved for this app. Check applicable requirements before proposing mainland China for a generative-AI app | preserve any existing exclusions and future-territory settings unless the user explicitly approves a change |
 | Metadata per locale | `fastlane/metadata/<locale>/` → deliver: name (30), subtitle (30), promo text (170), description (paid features + trial + renewal terms + Terms/Privacy links, else 2.3.2), keywords (100, no spaces, no repeats of name/subtitle), What's New, URLs | the first 3 lines of the description carry the conversion |
+| Copyright, content rights | `appStoreVersions.copyright` via the API; Content Rights in the web UI (App Information) | both block submission when empty |
 | Category, age rating | asc.py `ageRatingDeclarations`; deliver `--app_rating_config_path` | `socialMedia` key needed |
 | Support / privacy / terms / imprint URLs | site Worker (see [launch-assets.md](launch-assets.md)) | must resolve before review |
 | Export compliance | `ITSAppUsesNonExemptEncryption = NO` in Info.plist / `app.json` | |
@@ -53,13 +54,19 @@ final report shows a contact sheet of every set so the user can switch the defau
 reply. Upload via `fastlane deliver` or asc.py `appScreenshotSets`.
 
 ### App preview video
-- 886×1920 (or 1080×1920) H.264, 30 fps, **15–30 s** (Apple's limit), AAC audio track
-  (silent is fine; music per the round-T choice).
+- Use the [accepted resolution for the target display](https://developer.apple.com/help/app-store-connect/reference/app-information/app-preview-specifications/),
+  such as 886×1920 portrait for modern iPhones. Use H.264 at 30 fps, **15–30 s**, and an
+  AAC stereo track (silent is fine; music per the round-T choice).
 - **The real app, not the onboarding.** Brisk but readable: 2–3 s per scene, a short
-  caption per scene, no long wait at the start, the viral moment in the first 3 s, and an
-  end card.
+  caption per scene, no long wait at the start, the viral moment in the first 3 s, and a
+  closing caption over app footage.
+- **Layout: use full-screen captures of the app.** Add short explanatory captions where
+  they leave controls and content readable. See [App Review guideline 2.3.4](https://developer.apple.com/app-store/review/guidelines/#accurate-metadata).
+  Export the device frame and colorful background as a separate social promo when requested.
 - One per language. Poster frame set by `previewFrameTimeCode`.
 - `asc.py upload-preview --apply <file.mp4> <versionId> <locale> [--type IPHONE_67] [--frame 00:00:03:00]`
+- If the API workflow is unavailable, use the approved browser flow through Product Page
+  Information or Asset Library in [App Store Connect](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-your-app-store-assets).
 
 ### Review walkthrough video
 - One continuous take from a fresh install: onboarding → every permission prompt →
@@ -120,6 +127,8 @@ Run before the final report, and fix what fails:
 - [ ] No unused permission keys (Face ID from expo-secure-store, local network from
       expo-dev-client, which must never ship). `NSPhotoLibraryAddUsageDescription` is
       present if any share sheet exists (otherwise "Save Image" crashes)
+- [ ] `check_manifest.py <archive>` passes (tracking on ⇒ tracking domains listed; tracking
+  off ⇒ none listed). Otherwise the version turns "Invalid Binary" minutes after submitting.
 - [ ] App Privacy ⇔ privacy manifest ⇔ policy ⇔ SDK list all agree; ATT shown only if
       tracking SDKs are present
 - [ ] Icon 1024, no alpha; screenshots match the current UI
@@ -127,3 +136,13 @@ Run before the final report, and fix what fails:
 - [ ] Subscriptions "Ready to Submit", attached to the version
 - [ ] Duplicate-app risk (4.3) checked against the account's other apps
 - [ ] Kids category is not used if any analytics/ads SDK is present (1.3)
+
+## When the version turns "Invalid Binary"
+
+The build shows VALID, the submission goes in, and minutes later the version state is
+`INVALID_BINARY`. The API, the version page and TestFlight show **no reason**: Apple sends
+it only by email ("ITMS-xxxxx: …"). Ask the user for that email instead of guessing. The
+known cause from real runs is ITMS-91064 (tracking on, tracking-domain list empty).
+Fix it in `app.json`, `npx expo prebuild --clean`, rebuild with a new build number,
+attach, then in the web UI open the submission (version page → "Update Review") and
+click "Resubmit to App Review". The API can't change a submission with unresolved issues.

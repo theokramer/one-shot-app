@@ -66,10 +66,19 @@ the patterns.
 
 - **Multi-page in onboarding**: (a) what you get, as 3–4 outcome bullets with icons, using
   their answers; (b) the honest trial timeline; (c) plans.
-- **Plans**: lead with yearly, selected by default, badge "Most popular" (not "cheapest");
-  weekly as the second choice; at most 2–3 options. Show the **total** price prominently
+- **Plans: exactly two.** Yearly (selected by default, badge "Most popular" or an honest
+  "Save N%" against a year of the other plan) plus **one** short plan: yearly + weekly or
+  yearly + monthly, never all three on one screen. The pair can be part of the A/B test
+  (one variant yearly + weekly, another yearly + monthly). The native fallback shows the
+  same two. Show the **total** price prominently
   (a per-week breakdown may appear only next to the real total, or App Review can reject
   it), trial terms, auto-renew text, Restore, Terms, Privacy.
+- **One screen, no scrolling.** Everything (header, ≤ 3 one-line perks, a ≤ 2-row trial
+  timeline, both plans, CTA, legal text, Restore/Terms/Privacy) fits on a 6.1" iPhone
+  without scrolling. Cut copy before shrinking type. Only tiny screens (iPhone SE, zoomed
+  display) may scroll, so keep the container scrollable but sized to fit. QA checks this
+  in the Superwall studio (`superwall dev`, device iPhone 17 and SE) and on the native
+  fallback in the simulator.
 - **Trial**: a toggle or a trial-labelled CTA ("Start my 3-day free trial"), reminder
   promise, and a schedule for the reminder notification.
 - **Feature-gate paywalls** (`feature_*`) name the feature tapped in the headline.

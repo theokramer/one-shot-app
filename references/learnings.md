@@ -54,7 +54,26 @@ unrelated chat logs.
 - Product Page Optimization only opens after launch. Custom product pages work before.
 - Screenshot sets are moving to an "asset library" model (API 4.5+). If a set endpoint
   answers oddly, read the current docs.
-- Generative-AI apps: exclude mainland China from availability.
+- Read existing storefront availability and show the exact additions and removals for
+  approval before applying them. Preserve unrelated exclusions and future-territory settings.
+  Use the ordinary [App Store availability workflow](https://developer.apple.com/help/app-store-connect/manage-your-apps-availability/manage-availability-for-your-app-on-the-app-store/)
+  unless the user has separately approved a pre-order.
+- The store name limit is 30 characters, including the ": benefit" part. Check the length of
+  every name option before offering it, in every language.
+- Adding an `appInfoLocalization` auto-creates the matching `appStoreVersionLocalization`, so
+  a follow-up POST for the version text returns 409. Read, then PATCH.
+- Copyright (`appStoreVersions.copyright`) and Content Rights (web UI → App Information) are
+  easy to miss and block submission. Set both in the baseline.
+- Upload screenshots and previews through Product Page Information, Asset Library, or a
+  supported API. A custom product page stays separate. To switch the default screenshot
+  set, change the placements on the default page and keep existing library assets.
+  [Apple's asset guide](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-your-app-store-assets)
+  covers uploads, placements, and poster frames.
+- Win-back offers and offer codes need an **approved** subscription (409
+  `NON_APPROVED_SUBSCRIPTION`; win-back `startDate` must also be at least two days out).
+  Promotional offers can be created before review. Queue the rest for launch day.
+- Subscription review screenshot: one real capture of the paywall, uploaded to every
+  product (`superwall asc screenshots upload <file> --subscription <id>`).
 - The App Review contact phone/name has to be real; take it from config or put it on the
   to-do list.
 
@@ -62,8 +81,18 @@ unrelated chat logs.
 
 - `rc` CLI only, `--project-id` always, never switch the default project. "Offering has no
   attached paywall" from `rc offerings verify` is expected.
-- Apple server notifications → RevenueCat (V2): RC app page → "Apply in App Store Connect"
-  or `rc setup apple`.
+- Apple server notifications → RevenueCat (V2): `rc setup apple` may leave the routes
+  unset. Check both Production and Sandbox with the user. For an approved direct setup,
+  configure both in App Store Connect. If a route already has a consumer, agree on forwarding
+  before changing it. Follow the [RevenueCat setup guide](https://www.revenuecat.com/docs/platform-resources/server-notifications/apple-server-notifications)
+  and keep the URL out of chat and logs.
+- `rc` subcommand `--help` can print the root help. Find flags from the error messages
+  (`--store-id is required`, `app ID is required`) or `rc schema`; grants and attaches take
+  positional IDs (`rc customers grant <customer> <entitlement> --duration weekly`).
+- Superwall paywall-as-code folders must be kebab-case (`superwall/paywalls/my-paywall`);
+  folders with underscores are not discovered. `campaigns placements create` needs `--yes`.
+- Superwall paywall: keep the CTA visible above the fold (sticky actions bar), and compute
+  "Save X %" against twelve monthly payments, not weekly × 52 (a 90 %+ badge reads as a trick).
 - A test device that never logs in to RC with its own app user ID breaks server-side Pro
   checks. Call `Purchases.logIn(deviceId)` before the first server call.
 - Superwall paywall-as-code works (`superwall create`, `npx superwall@latest publish`).
@@ -75,7 +104,29 @@ unrelated chat logs.
 - The Superwall libcel signature collision on archive is harmless: write the archive
   `Info.plist` by hand (the release script does).
 - The Apple **team** ID (ASC → Membership) ≠ the personal ID shown on the signing certificate.
-- Keep ≥ 15 GB free disk. Clear the app's DerivedData and old recordings.
+- Keep ≥ 15 GB free disk. Clear the app's DerivedData and old recordings. Check free disk
+  space and memory pressure before heavy jobs. Generate music and archive sequentially
+  to avoid concurrent swap growth.
+- Simulator Release builds: `CODE_SIGNING_ALLOWED=NO` strips the keychain entitlement, so
+  secure storage fails and every API call looks "offline". Use `CODE_SIGN_IDENTITY=-
+  CODE_SIGNING_REQUIRED=NO`. Map only network failures to "offline" in the API client.
+- `expo run:ios` re-runs `pod install` without a UTF-8 locale and dies on CDN hiccups. Export
+  `LANG=en_US.UTF-8`, run `pod install` once yourself, then build with `xcodebuild`.
+- A Debug build without expo-dev-client asks Metro on port 8081. For another port, set
+  `xcrun simctl spawn '<SIMULATOR_UDID>' defaults write '<BUNDLE_ID>' RCT_jsLocation '127.0.0.1:<PORT>'`
+  and relaunch the app on that simulator.
+- Don't copy `node_modules` (or `.git`) from another project to save time; it breaks module
+  resolution. Do a clean install.
+- `expo-secure-store` adds `NSFaceIDUsageDescription` unless configured with
+  `faceIDPermission: false`; prebuild never removes keys, so rebuild with `--clean`.
+- Simulator taps get dropped while an archive saturates the CPU. Capture screenshots and
+  videos when no build is running, and screenshot after each step.
+- Cloudflare's bot protection answers 403 to Python's default `urllib` user agent; scripts
+  that call the app's Worker must send their own `User-Agent`.
+- LLM output: strip markdown emphasis (`*word*`) from every string server-side before it
+  reaches chat bubbles or notifications.
+- Expo Router: after onboarding, `replace('/')` and then `push` the first detail screen, so
+  the back button returns to the tabs.
 - Simulator: your own named device; tap delivery can hang (reboot it); the shared iPhone 17
   belongs to other sessions.
 - Gemini: images `gemini-3-pro-image` / `gemini-3.1-flash-image`, video
@@ -96,3 +147,19 @@ unrelated chat logs.
 - Claude never types tokens or payment details, even with permission. Hand the user the
   exact field.
 - Ad SDKs mean App Privacy has tracking = yes, plus an ATT prompt.
+
+## Paywalls with three plans felt crowded and needed scrolling
+A run shipped yearly + monthly + weekly on every paywall, plus four perks and a three-step
+trial timeline. On a 6.1" phone the plans and CTA fell below the fold. Rule now: exactly
+two plans (yearly + weekly or yearly + monthly), at most three one-line perks, a two-row
+timeline, and the whole paywall fits one screen without scrolling (tiny devices excepted).
+See [conversion.md §3](conversion.md#3-paywalls-that-convert-and-pass-review).
+
+## "Invalid Binary" from an empty tracking-domain list (twice)
+Two apps with the Meta + TikTok SDKs set `NSPrivacyTracking: true` with an empty
+`NSPrivacyTrackingDomains`. The upload passed and the build showed VALID, but after
+submitting, the version flipped to "Invalid Binary" with ITMS-91064, which Apple explains
+only by email. One run then rebuilt without effect, because `expo prebuild` does not
+overwrite an existing `PrivacyInfo.xcprivacy`. Now `ep1.facebook.com` is listed, prebuild
+runs with `--clean`, and `assets/scripts/check_manifest.py` runs inside `release.sh`, so
+the release stops before uploading a build that would fail this way.
