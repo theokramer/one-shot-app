@@ -288,13 +288,16 @@ No module choice, cached preference, login or generic plan approval authorizes a
 
 ## 3. Follow-up questions (only what you can't infer)
 
-Usually one call with two questions, often merged into round C:
+Usually one call with two or three questions (name, pricing, mascot), merged into round C
+when they fit (at most 4 questions per card):
 
 | Question | Notes |
 |---|---|
 | **Name** | Card with 3 concrete names as options (the user can still type one via "Other"). **Before offering them, check each one is free**: search the App Store in the US and DE (`https://itunes.apple.com/search?term=<name>&entity=software&country=us`, then `country=de`). Reserved names may require a different working title. Also check the user's own apps in the library (`apps`) for duplicate-app risk (4.3): two similar apps on one account is a rejection risk. |
 | **Pricing** | Card with 3–4 options. Default recommendation: **weekly + yearly, 3-day trial on yearly** (e.g. $6.99/wk, $39.99/yr), unless the library has `defaults.pricing`. Alternatives: monthly + yearly with a 7-day trial; yearly only; lifetime + yearly. |
 | **Free vs Pro** | Propose it, don't ask it. Default is a **hard nudge** (backed by the data in [conversion.md](conversion.md)); the library's preferences override it: the core "wow" feature is Pro after one free taste, browsing stays free, everything with ongoing cost is Pro (e.g. a fitness coach: form analysis Pro, exercise library free, coach 1 message/day, most programs locked). |
+
+| **Mascot** | Card from [mascot.md](mascot.md#1-the-question-step-3-in-the-same-card-as-name-and-pricing), asked after the name is known. On "Yes, show me ideas", **sketch 3 concepts now** (contact sheet + a pick card), before connect and the plan. The pick goes into `docs/MASCOT.md` and shapes icon, funnel and store assets. |
 
 Don't ask about colours, fonts, architecture, persistence, deployment target or folder
 layout. Decide them.
@@ -374,6 +377,7 @@ Then show the plan in chat in **at most 15 lines**:
 Viral moment: <the feature>
 Stack: Expo · RevenueCat + Superwall · Cloudflare · Meta + TikTok · EN/DE
 Free vs Pro: <one line>
+Mascot: <Name>, <form> (or "none")
 Store: full basics + 3 screenshot sets, preview video EN/DE, review video, win-back
 Tests: 2 paywall designs × 2 yearly prices (4 variants) · Retention: $9.99/yr, every year
 Automatic: only the actions and exact targets listed in the private plan

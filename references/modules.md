@@ -129,3 +129,12 @@ none.
 Recorded from the simulator (`simctl io recordVideo`), cut with ffmpeg, captions drawn
 locally, music per the round-T choice (ACE-Step, silent or own track), 9:16,
 under 30 s, the viral moment in the first second.
+
+## Mascot (asked in step 3, not a menu tick)
+
+Three original concepts are sketched and one is picked **before "Go"**. Then a master
+plus an expression set (neutral, happy, thinking, celebrate, encourage, sad-miss-you,
+sleep), a `Mascot` component with idle motion, and placement in onboarding, the first
+win, win-back, empty states, one icon concept, 1–2 screenshots and the site. Images come
+from the round-T choice (Gemini/Sunra within the cap, or local SVG at $0). Ref:
+[mascot.md](mascot.md)

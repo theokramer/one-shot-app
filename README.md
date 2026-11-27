@@ -13,7 +13,8 @@ guidance in one workflow.
 
 1. **Pitch.** You describe the idea, optionally with a reference app or screenshot.
 2. **Tick boxes.** Clickable menus for the modules, how complete App Store Connect should be,
-   languages, permissions and a spend cap. Almost no typing.
+   languages, permissions and a spend cap. Almost no typing. Want a mascot? It sketches three
+   original concepts and you pick one before it starts.
 3. **Connect selected services.** It verifies access only for the services you approve.
 4. **One plan, one "Go".**
 5. **Build and verify.** It tests the app in a separate simulator and prepares assets.

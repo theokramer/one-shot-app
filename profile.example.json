@@ -55,7 +55,8 @@
     "paywallVariants": "",
     "priceTests": "",
     "retentionPrice": "",
-    "retentionForm": ""
+    "retentionForm": "",
+    "mascot": ""
   },
   "preferences": {
     "_comment": "Taste and standing instructions the user gave during runs, one short line each, with the date. Read before every run; add to it in phase 11 whenever the user corrected something.",

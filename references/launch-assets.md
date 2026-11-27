@@ -13,6 +13,8 @@ the assets well.
   Gemini or Sunra concepts (within the spend cap; keys from `~/.one-shot-app/config.json`,
   never printed), a Blender render or vector composition (local), or a typographic/vector
   icon (no generation).
+- If the app has a mascot (`docs/MASCOT.md`), one concept is its face or signature
+  feature. It wins only if it reads better at 40 px than the others.
 - Pick the best concept yourself, write the reasoning into `DECISIONS.md`, and show the
   rest in the final report so the user can swap with one word.
 - Export 1024×1024, **no alpha, no rounded corners**: `sips -g hasAlpha icon.png` → `no`.
