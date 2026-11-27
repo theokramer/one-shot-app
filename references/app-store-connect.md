@@ -144,5 +144,10 @@ The build shows VALID, the submission goes in, and minutes later the version sta
 it only by email ("ITMS-xxxxx: …"). Ask the user for that email instead of guessing. The
 known cause from real runs is ITMS-91064 (tracking on, tracking-domain list empty).
 Fix it in `app.json`, `npx expo prebuild --clean`, rebuild with a new build number,
-attach, then in the web UI open the submission (version page → "Update Review") and
-click "Resubmit to App Review". The API can't change a submission with unresolved issues.
+attach, then resubmit. Submitting the old draft right away fails with "Version is not ready
+to be submitted yet" for as long as you retry. The fix: remove the version's
+`reviewSubmissionItem` from the draft and add it back (`DELETE /v1/reviewSubmissionItems/{id}`,
+then `POST /v1/reviewSubmissionItems` with the version), then submit the draft
+(`PATCH reviewSubmissions {submitted: true}`; only on the user's explicit request). In the
+web UI the same thing is version page → "Update Review" → "Resubmit to App Review". Watch
+the version state for about 8 minutes afterwards: the binary check runs after submission.
