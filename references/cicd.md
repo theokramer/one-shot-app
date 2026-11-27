@@ -39,8 +39,7 @@ gh secret list --env app-store
 ## The App Store Connect app record
 
 **This is done in phase 4, not here.** The public API refuses `POST /v1/apps`, and
-`fastlane produce` won't take the `.p8`. The path that works, and that the last three apps
-used, is:
+`fastlane produce` won't take the `.p8`. Use:
 
 ```bash
 rc setup apple <rc-app-id> --project-id <rc-project-id>    # in the user's terminal

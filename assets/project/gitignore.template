@@ -24,6 +24,18 @@ xcuserdata/
 .env.*
 config.json
 secrets.json
+profile.json
+learnings.local.md
+.one-shot-app/
+*.pem
+*.key
+*.pfx
+
+# Private App Review contact and raw demo captures
+review_information/
+frames/
+recordings/
+storyboard.json
 
 # Supabase
 supabase/.temp/

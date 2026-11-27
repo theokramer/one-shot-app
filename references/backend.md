@@ -18,7 +18,7 @@ A local-first app with SwiftData ships faster and has fewer ways to fail.
 
 Say in one line which trigger fired, or that none did.
 
-**Which one:** pick a **Cloudflare Worker** (the default for the last three apps) when the
+**Which one:** pick a **Cloudflare Worker** when the
 need is server-side AI/API keys, rate limiting, light storage (D1/R2) and hosting the
 support site. Pick **Supabase** when there are real accounts, sync or shared/social data.
 Both are fine for a single app if each does its own job.

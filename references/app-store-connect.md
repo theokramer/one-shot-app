@@ -37,9 +37,9 @@ everything green.
 | Export compliance | `ITSAppUsesNonExemptEncryption = NO` in Info.plist / `app.json` | |
 | App Privacy | answers in `store/APP_PRIVACY.md`, derived from the code, then 🌐 fill + **Publish** (needs the "Write to ASC" tick; if ASC asks for re-auth, put it on the to-do list) | must match the privacy manifest + policy + SDK manifests. Ads SDKs → tracking = yes for Device ID, Purchase History, Product Interaction |
 | Compliance forms | 🌐 AI-generated content (models, safeguards, reporting), Security; medical-device declaration (usually No) | answers drafted in `store/COMPLIANCE.md` |
-| Review notes + contact | asc.py `appStoreReviewDetails`: how to test, free vs Pro, AI + consent, ATT, languages, no login needed. Contact name/email/phone from the library (`profile.py get reviewContact`). The intake already asked for anything missing; never invent it | keep current with every build |
+| Review notes + contact | asc.py `appStoreReviewDetails`: how to test, free vs Pro, AI + consent, ATT, languages, no login needed. Build the request in a local script that reads `reviewContact` directly from the library without printing its values. Keep any export outside Git or in ignored `review_information/`. The intake already asked for anything missing; never invent it | keep current with every build |
 | Build | upload, wait for `VALID`, attach: `asc.py attach-build <versionId> <buildNumber>` | bump the build number every upload |
-| Screenshots (one set) | 6.9" **1320×2868** required (6.5" 1242×2688 optional); iPhone only unless the app supports iPad. **No iPhone Duo screenshots** (the user removed them) | see the style rules in launch-assets.md |
+| Screenshots (one set) | 6.9" **1320×2868** required (6.5" 1242×2688 optional); iPhone only unless the app supports iPad. **No iPhone Duo screenshots** | see the style rules in launch-assets.md |
 
 ---
 
@@ -77,7 +77,7 @@ reply. Upload via `fastlane deliver` or asc.py `appScreenshotSets`.
   white fringes) and no floating objects.
 - No public API: upload in Chrome. **Check the language selector label before each upload.**
   The menu lists localized languages above unlocalized ones, and one click too low *adds a
-  new language* (Catalan got added by accident once). Delete stray localizations with
+  new language*. Delete stray localizations with
   asc.py.
 
 ### Custom product pages + A/B

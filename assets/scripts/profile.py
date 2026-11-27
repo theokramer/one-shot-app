@@ -4,13 +4,13 @@
     profile.py init                              # create profile.json (seeded from config.json) if missing
     profile.py missing --for website,review,meta,tiktok   # exit 1 + list of missing fields
     profile.py get imprint.city                  # one value
-    profile.py set imprint.city=Berlin imprint.postalCode=10115 ...
+    profile.py set-private imprint.city          # hidden prompt in the user's own terminal
     profile.py confirm imprint                   # stamp confirmedAt = today
     profile.py add-pref "Store art: phones fully visible, never cut at the bottom"
     profile.py add-app name=MyApp bundle=com.example.myapp stack=expo dir="~/Documents/MyApp" category="habit tracker"
     profile.py save-menu '{"money":["RevenueCat subscriptions"], ...}'
     profile.py save-tools '{"research":["Mobbin MCP"],"design":[...],"images":[...],"music":"Silent"}'
-    profile.py imprint-html --lang de|en         # the imprint page body, for site/gen.py
+    profile.py imprint-html --lang de|en --output PATH  # write approved public imprint locally
     profile.py summary                           # short, non-sensitive overview for the intake
 
 Personal data: lives in ~/.one-shot-app/ (see paths.py), never in the skill folder or a repo.
@@ -18,6 +18,7 @@ Personal data: lives in ~/.one-shot-app/ (see paths.py), never in the skill fold
 from __future__ import annotations
 
 import datetime as dt
+import getpass
 import html
 import json
 import pathlib
@@ -160,12 +161,12 @@ def summary():
     print(f"reviewContact {'complete' if not missing(['review']) else 'incomplete: ' + ', '.join(f for _, f in missing(['review']))}")
     print(f"accounts      meta ad {have('accounts.metaAdAccountId')}  tiktok {have('accounts.tiktokAdvertiserId')}")
     md = p.get("menuDefaults", {})
-    print(f"last menu     {md.get('updatedAt') or 'none'}")
+    print(f"last menu     {'saved' if md.get('updatedAt') else 'none'}")
     td = p.get("toolDefaults", {})
     tools = [x for k in ("research", "design", "images") for x in td.get(k, [])] + ([td["music"]] if td.get("music") else [])
-    print(f"tools         {', '.join(tools) if tools else 'not chosen yet (ask round T)'}")
+    print(f"tools         {len(tools)} selected" if tools else "tools         not chosen yet (ask round T)")
     print(f"preferences   {len(p.get('preferences', {}).get('items', []))} saved")
-    print(f"apps          {', '.join(a.get('name', '?') for a in p.get('apps', {}).get('items', [])) or 'none'}")
+    print(f"apps          {len(p.get('apps', {}).get('items', []))} saved")
 
 
 def main():
@@ -187,6 +188,20 @@ def main():
     elif cmd == "get":
         v = dig(load(), a[0])
         print(json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else (v or ""))
+    elif cmd == "set-private":
+        if len(a) != 1 or not sys.stdin.isatty():
+            raise SystemExit("Run profile.py set-private <field> in your own terminal")
+        field = a[0]
+        template = json.loads(EXAMPLE.read_text())
+        if field.split('.')[0] not in {"identity", "imprint", "reviewContact", "accounts"} or not isinstance(dig(template, field), str) or any(k.startswith('_') for k in field.split('.')):
+            raise SystemExit("Choose a contact, identity or account field from profile.example.json")
+        value = getpass.getpass(f"{field} (input hidden): ").strip()
+        if not value:
+            raise SystemExit("Nothing entered; nothing saved")
+        p = load()
+        put(p, field, value)
+        save(p)
+        print("saved", field)
     elif cmd == "set":
         p = load()
         for kv in a:
@@ -230,7 +245,12 @@ def main():
         print("saved tool defaults")
     elif cmd == "imprint-html":
         lang = a[a.index("--lang") + 1] if "--lang" in a else "de"
-        print(imprint_html(lang))
+        if "--output" not in a or a.index("--output") + 1 >= len(a):
+            raise SystemExit("Use --output PATH to write the approved public imprint without printing contact details")
+        output = pathlib.Path(a[a.index("--output") + 1]).expanduser()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(imprint_html(lang), encoding="utf-8")
+        print("wrote imprint HTML")
     elif cmd == "summary":
         summary()
     else:

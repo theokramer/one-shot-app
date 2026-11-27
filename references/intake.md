@@ -16,7 +16,7 @@ python3 "$SKILL/assets/scripts/setup.py" status      # exit 1 = first run / core
 ("First time: two minutes of setup, then this is never asked again") and collect what's
 missing. **Choices first, typing last, secrets never in chat:**
 
-1. `setup.py detect` → GitHub login and orgs, git name/email, project folders, installed
+1. `setup.py detect` → GitHub login and orgs, whether Git identity is configured, project folders, installed
    tools. Turn them into options.
 2. One `AskUserQuestion` card (≤ 4 questions), pre-filled from `detect`:
    - **GitHub owner**: `<login>` · `<org1>` · `<org2>`
@@ -26,7 +26,8 @@ missing. **Choices first, typing last, secrets never in chat:**
 3. A second card: **App Store Connect API key**: "I have a .p8 key file" · "Help me create
    one" (steps: ASC → Users and Access → Integrations → App Store Connect API → Team key, App
    Manager. It downloads once; move it outside any repo). **Gemini (optional)**: "Add a key
-   later" · "I have a key". **Support email for app sites**: git email · "Other".
+   later" · "I have a key". **Public support email for app sites**: "Use saved public support email" · "Enter locally".
+   Never publish the Git or Apple account email as a default.
 4. One plain message for the remaining typed values, all non-secret: Apple **Team ID**
    (ASC → Membership; not the certificate's personal ID), ASC **Key ID** and **Issuer ID**,
    and the **path** to the `.p8`. Never search the disk for key files. Save them with
@@ -39,22 +40,24 @@ missing. **Choices first, typing last, secrets never in chat:**
    go through it once.
 7. `setup.py status` → exit 0, then continue with the pitch.
 
-Returning users skip all of this. Then load the library silently:
+Returning users skip all of this. Check the library without printing private values:
 
 ```bash
 python3 "$SKILL/assets/scripts/profile.py" summary
 python3 "$SKILL/assets/scripts/profile.py" missing --for website,review,identity
 ```
 
-`~/.one-shot-app/profile.json` (plus `~/.one-shot-app/learnings.md`) is everything earlier runs learned about the user: identity, imprint,
-review contact, account IDs (Meta ad account, TikTok advertiser), last run's menu
-answers, standing preferences, and every app shipped so far. Read it all (`cat` is fine;
-it's local) and treat it as already answered:
+`~/.one-shot-app/profile.json` and `~/.one-shot-app/learnings.md` contain private data.
+Never print either file in full. A local file read shown in tool output enters the
+assistant context. Use the redacted summary and missing-field checks first. Retrieve
+only a specific preference or field needed for the authorized step; local scripts
+should read contact details and credentials directly for their intended destination.
 
 - **Never ask for anything the library holds.** Use it, and mention it in a single line
   ("Using your saved imprint and review contact").
 - **Preferences** are standing instructions. Apply them without restating them.
-- **Apps** drive the name-collision and duplicate-app (4.3) check.
+- **Apps** drive name-collision and duplicate-app (4.3) checks. Compare candidate names
+  locally; return only the match result, not the full app list.
 - What's **missing** is collected once in step 3, then saved, so the next run doesn't
   ask again.
 
@@ -195,7 +198,7 @@ as `toolDefaults` with `profile.py save-tools '{…}'`. Every later phase reads
   { "header": "Stack", "multiSelect": false,
     "question": "Which stack?",
     "options": [
-      { "label": "Expo / React Native", "description": "Fast iteration, 3D/Skia, native modules when needed. Three of the four reference apps use it." },
+      { "label": "Expo / React Native", "description": "Fast iteration, 3D/Skia, native modules when needed." },
       { "label": "Native SwiftUI", "description": "Smallest binary, best for heavy Apple frameworks (ARKit, Vision, widgets)." } ] }
 ]
 ```
@@ -329,7 +332,7 @@ Usually one call with two questions, often merged into round C:
 
 | Question | Notes |
 |---|---|
-| **Name** | Card with 3 concrete names as options (the user can still type one via "Other"). **Before offering them, check each one is free**: search the App Store in the US and DE (`https://itunes.apple.com/search?term=<name>&entity=software&country=us`, then `country=de`). Two working titles were taken mid-run once and had to be renamed. Also check the user's own apps in the library (`apps`) for duplicate-app risk (4.3): two similar apps on one account is a rejection risk. |
+| **Name** | Card with 3 concrete names as options (the user can still type one via "Other"). **Before offering them, check each one is free**: search the App Store in the US and DE (`https://itunes.apple.com/search?term=<name>&entity=software&country=us`, then `country=de`). Reserved names may require a different working title. Also check the user's own apps in the library (`apps`) for duplicate-app risk (4.3): two similar apps on one account is a rejection risk. |
 | **Pricing** | Card with 3–4 options. Default recommendation: **weekly + yearly, 3-day trial on yearly** (e.g. $6.99/wk, $39.99/yr), unless the library has `defaults.pricing`. Alternatives: monthly + yearly with a 7-day trial; yearly only; lifetime + yearly. |
 | **Free vs Pro** | Propose it, don't ask it. Default is a **hard nudge** (backed by the data in [conversion.md](conversion.md)); the library's preferences override it: the core "wow" feature is Pro after one free taste, browsing stays free, everything with ongoing cost is Pro (e.g. a fitness coach: form analysis Pro, exercise library free, coach 1 message/day, most programs locked). |
 
@@ -339,38 +342,33 @@ layout. Decide them.
 ### Missing library data (asked once, ever)
 
 If `profile.py missing` reported gaps, ask **choice-able fields as an `AskUserQuestion`
-card first**, with options pre-filled from the library and the context:
+card first**, with options using labels for saved choices rather than displaying their private values:
 
 | Field | Options |
 |---|---|
-| Imprint email | the saved account email · `support@<app-domain>` if a domain exists · "Other" |
-| Imprint phone | the saved review-contact phone · "No phone, use a contact form on the site" · "Other" |
+| Imprint email | "Use saved public support email" · "Enter locally" |
+| Imprint phone | "Use saved public contact number" · "No phone, use a contact form on the site" · "Enter locally" |
 | Person or company | "Private person (sole trader)" · "Company (GmbH/UG/…)" |
 | VAT ID | "None (small business, § 19 UStG)" · "I have one" (then typed) |
-| App Review phone | the saved number · "Same as imprint" |
+| App Review phone | "Use saved review number" · "Same as approved imprint" · "Enter locally" |
 | Country | "Deutschland" · "Österreich" · "Schweiz" |
 | Mobbin collections (only if Mobbin is a chosen tool) | "Yes, save each app's references to a private collection" · "No" |
 
-Only what's left (street, postcode, city, and names nobody could guess) goes into one
-plain chat message, for example:
+For remaining personal fields, list the field names needed and let the user enter them
+in their own terminal with `profile.py set-private <field>` (hidden input). Do not ask
+them to paste their name, address, phone, email or tax/register details into chat.
+The missing-field check reports completeness without showing values.
 
-> For the website's **imprint (Impressum)**, which German law requires on every app site, and
-> the **App Review contact**, I need these once. I'll save them, so later apps won't ask:
->
-> - Full name (or company name + legal form + representative)
-> - Postal address for service of documents: street, postcode, city, country. No PO box;
->   a paid c/o imprint service address works if you don't want your home address public
-> - Email and phone for the imprint (published)
-> - VAT ID / register entry, if you have one
-> - App Review contact phone (not published), if different
-
-Save the answers with `profile.py set imprint.street=… …`, then `profile.py confirm imprint`.
-Never guess or fill in a placeholder. If the user skips it, the run builds the site
-without `/imprint` and puts it first on the to-do list. Re-confirm the imprint once
-`confirmedAt` is more than 12 months old ("Is this still right?", showing what's saved).
+Explain the destinations before the existing plan approval: imprint fields will be
+public on the website; review-contact fields go to App Store Connect. The user reviews
+the imprint locally, chooses which contact details may be public, then runs
+`profile.py confirm imprint`. Never substitute a private account email or review phone
+for a public contact field. If they skip it, build the site without `/imprint` and put
+it on the to-do list. Re-confirm locally when `confirmedAt` is over 12 months old or
+when the public details change; do not reproduce the saved address in chat.
 
 Anything new the user mentions along the way (a new ad account, a support email, "always do
-X") goes into the library right away: `profile.py set …` / `add-pref "…"`.
+X") goes into the library right away: `profile.py set-private <field>` / `add-pref "…"`.
 
 ### Naming (derived)
 
@@ -378,7 +376,7 @@ X") goes into the library right away: `profile.py set …` / `add-pref "…"`.
 - Bundle ID: `<bundleIdPrefix>.<lowercasename>`. The prefix comes from `config.json`
   (keep the one in config).
 - Repo: `<githubOwner>/<kebab-name>-ios` (check with `gh repo view`; a 404 means it's free)
-- Store name: `<Name>: <benefit>` up to 30 chars (e.g. "Roomly: AI Home Design")
+- Store name: `<Name>: <benefit>` up to 30 chars (use the approved app name and benefit)
 - Entitlement `pro`; products `<bundle>.pro.yearly`, `<bundle>.pro.weekly`
 
 ---

@@ -9,10 +9,9 @@ user-invocable: true
 Pitch → tick boxes → connect everything → one plan → **walk away** → a finished app in App
 Store Connect, waiting only for the user's "submit".
 
-Built from shipping four real subscription apps (one SwiftUI, three Expo). Every rule below
-comes from something that broke in one of those runs. Before you start, read
-[references/learnings.md](references/learnings.md) (gotchas, real App Review rejections)
-and the user's own `~/.one-shot-app/learnings.md` (their taste and history).
+Before you start, read [references/learnings.md](references/learnings.md) for reusable
+implementation guidance. Load only the saved preferences relevant to the current task;
+do not dump the user's profile or personal learnings into chat or tool output.
 
 ## The contract with the user
 
@@ -105,9 +104,10 @@ Blender, free CC0 assets. Never buy, never enter payment details, and never laun
 
 **7. Never ask twice: the library.** `profile.json` (via `assets/scripts/profile.py`)
 remembers the user: identity, imprint data, review contact, ad-account IDs, last run's menu
-answers, standing preferences, and every shipped app. Read it before the first message, use
-it instead of asking, ask for missing pieces once, and write back everything learned in
-phase 11. Each run should need fewer clicks than the last.
+answers, standing preferences, and every shipped app. Start with the redacted `summary`
+and `missing` commands. Local scripts should read contact details and credentials directly
+for their intended destination without printing them. Load only relevant preferences into
+the assistant context, and save only information needed for future runs.
 
 **8. Conversion is the product.** The funnel (store page → first win → onboarding →
 paywall → day 1/day 7) gets more care than any feature. Every funnel screen is researched
@@ -145,26 +145,33 @@ final message asks once.
 - **Store art is built from real captures.** No AI-drawn UI, no AI backgrounds by default,
   phones fully visible or deliberately cropped, never cut off at the bottom.
 - **The paywall shows** price, period, trial terms, auto-renew text, Restore, Terms and
-  Privacy, and buys the plan that is selected (a past app was rejected twice under 2.1(b)).
+  Privacy, and buys the plan that is selected (Guideline 2.1(b)).
 - **Permission priming screens say "Continue"** and always lead to the system prompt. No
-  "Not now" (a past app was rejected under 5.1.1(iv)).
+  "Not now" (Guideline 5.1.1(iv)).
 - **Name the AI provider in an explicit consent before sending data to it** (Guideline
   5.1.2(i)).
 - **The App Privacy answers match the code, the SDKs, the privacy policy and the privacy
-  manifest exactly** (earlier rejection under 5.1.2).
+  manifest exactly** (Guideline 5.1.2).
 
 ## Where things live
 
-- **Nothing personal lives in the skill folder**, so it can be shared as is. Each user's data
-  lives in their data home `~/.one-shot-app/` (override with `ONE_SHOT_HOME`; see
+- **Keep personal data outside the skill and generated repositories.** Each user's data
+  belongs in their data home `~/.one-shot-app/` (override with `ONE_SHOT_HOME`; see
   `assets/scripts/paths.py`):
-  - `config.json`: secrets and account keys (template: `config.example.json`). Read it, never
-    print it, never ask for anything already in it.
+  - `config.json`: secrets and account keys (template: `config.example.json`). Read it in
+    local scripts, never print it, never ask for anything already in it.
   - `profile.json`: the library, with the user's non-secret data and history (template:
     `profile.example.json`, managed by `assets/scripts/profile.py`). The imprint fields are
-    published on app websites by design; nothing else leaves the machine.
-  - `learnings.md`: personal learnings, read before every run, appended in phase 11.
+    published on approved app websites; review contact goes to App Store Connect. Values
+    printed by tools or included in chat become part of the assistant context. Other
+    account data is sent only to the services needed for the authorized task.
+  - `learnings.md`: personal learnings; read only task-relevant portions, append in phase 11.
   - None of these is ever copied into a repo or into the skill folder.
+- Before publishing, run `assets/scripts/package.py scan` and separately `scan --history`
+  for Git history. These are heuristic checks, not a guarantee. Review text and media too.
+- Keep App Review contact exports outside repositories, or in an ignored
+  `review_information/` directory. Verify they are not tracked before committing. Confirm
+  which imprint fields will be public during intake, before the existing plan approval.
 - `assets/scripts/setup.py` handles first-run setup (`status`, `detect`, `set`, and
   `secret` for hidden input in the user's own terminal).
 - `assets/scripts/preflight.py --modules …` is the phase-4 gate.

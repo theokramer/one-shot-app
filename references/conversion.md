@@ -11,7 +11,7 @@ direction, not law. They explain *why* the rules exist.
 | Fact | Source | Consequence for the build |
 |---|---|---|
 | ~82 % of trial starts happen on install day; most within the first minutes | RevenueCat SOSA 2025, "Fix your funnel" (Nov 2025) | The first session is the business. Onboarding + paywall get the most care of anything in the app |
-| Hard paywall: median trial→paid ~10.7 % vs ~2.1 % freemium; 1-year retention about equal (27 % vs 28 %) | RevenueCat SOSA 2026 | The user's "hard nudge" taste is backed by data: gate the core value, keep a taste free |
+| Hard paywall: median trial→paid ~10.7 % vs ~2.1 % freemium; 1-year retention about equal (27 % vs 28 %) | RevenueCat SOSA 2026 | Gate the core value while keeping a useful free sample |
 | Multi-page onboarding paywalls 12.4 % vs single-page 9.1 % (observational, 40M opens) | Superwall blog, May 2026 | Paywall = 2–3 screens: value → what happens (trial timeline) → plans |
 | Paywall moved earlier + a 3-screen context carousel: 2 % → 8 % → 15 % trial opt-in (one test) | RevenueCat, "How top apps approach paywalls" | Never bury the paywall after the app; give it context screens right before |
 | An honest trial timeline + reminder: +23 % conversion, −55 % complaints (Blinkist) | same | Show "Today / Day 2 reminder / Day 3 billed" on the trial paywall |

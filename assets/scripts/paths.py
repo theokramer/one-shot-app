@@ -1,7 +1,7 @@
 """Where one-shot-app keeps things.
 
-The skill folder is shareable and holds no personal data. Everything about the person using
-it (keys, identity, imprint, history, personal learnings) lives in their own data home:
+Keep the skill folder free of personal data. Store keys, identity, imprint, history and
+personal learnings in the user's data home:
 
     $ONE_SHOT_HOME  (default ~/.one-shot-app/)
       config.json      secrets + account keys          (chmod 600)
@@ -29,7 +29,7 @@ PROFILE_EXAMPLE = SKILL_DIR / "profile.example.json"
 LEARNINGS_SEED = """# Personal learnings
 
 What one-shot-app learned from *your* runs: taste, accounts, past apps, things that broke.
-The skill reads this before every run and appends to it at the end of each run.
+The skill reads only task-relevant portions and appends to it at the end of each run.
 """
 
 

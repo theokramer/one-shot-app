@@ -2,7 +2,7 @@
 """Assemble a one-shot demo video (and a README GIF) from a storyboard.
 
     make_demo.py storyboard.json                    # → out.mp4 (+ out.gif if "gif" is set)
-    make_demo.py storyboard.json --readme README.md # also put the GIF between <!-- demo:start/end -->
+    make_demo.py storyboard.json --readme README.md --reviewed-for-sharing # after manual privacy review
 
 storyboard.json (paths are relative to the storyboard file):
 {
@@ -193,6 +193,8 @@ def main():
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
         print(__doc__)
         return
+    if "--readme" in sys.argv and "--reviewed-for-sharing" not in sys.argv:
+        raise SystemExit("Review and redact the rendered video/GIF first, then pass --reviewed-for-sharing to update README")
     if not shutil.which("ffmpeg"):
         raise SystemExit("ffmpeg missing: brew install ffmpeg")
     sb_path = pathlib.Path(sys.argv[1]).resolve()

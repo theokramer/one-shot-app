@@ -1,8 +1,7 @@
-# Learnings from past one-shot runs
+# Implementation guidance
 
-Read this before phase 1, together with the user's own `~/.one-shot-app/learnings.md`
-(their taste, accounts and history). Everything here cost hours once, while building real
-subscription apps (one SwiftUI, three Expo) with this skill.
+Read this before phase 1. Keep user-specific preferences, accounts and history in the
+local data home; load only the portions needed for the current task.
 
 Where new learnings go at the end of a run (phase 11):
 - about **this user** (taste, accounts, their apps): `~/.one-shot-app/learnings.md` and the
@@ -10,7 +9,7 @@ Where new learnings go at the end of a run (phase 11):
 - about **one app**: that repo's `LEARNINGS.md`
 - **general and reusable by anyone**: here, written without names, IDs or paths
 
-## Default taste (the user's library preferences override this)
+## Default design guidance (saved preferences can override this)
 
 - Make the design decisions yourself; ask only about permission, money, naming and legal data.
 - Premium and real, never "AI-generated looking": real captures, licensed 3D (Poly Haven
@@ -22,22 +21,22 @@ Where new learnings go at the end of a run (phase 11):
 - Ask before any spend; never submit for review, spend or launch ads without an explicit OK.
 
 
-## Apple review lessons (real rejections behind this skill)
+## App Review checks
 
-| Guideline | What happened | Rule |
+| Guideline | Check | Rule |
 |---|---|---|
-| 5.1.1(iv) | A priming screen had "Turn on camera" + "Not now" | One "Continue" button that always leads to the system prompt |
-| 2.1(b) | Picking weekly still bought annual (rejected twice) | Test that the selected plan is the one purchased; the legal text follows the selected plan |
-| 5.1.2 | Privacy labels didn't match; an unneeded tracking prompt was shown | Labels = code = manifest = policy. ATT only with real tracking SDKs |
-| 1.3 | Analytics SDK in a Kids-category app | No Kids category with any analytics or ads SDK |
-| 2.3.2 | Paid features unclear in the description | Description lists free vs Pro, trial, renewal, Terms/Privacy |
+| 5.1.1(iv) | Permission priming | One "Continue" button that always leads to the system prompt |
+| 2.1(b) | Selected subscription matches the purchase | Test that the selected plan is the one purchased; the legal text follows the selected plan |
+| 5.1.2 | Privacy declarations and tracking consent | Labels = code = manifest = policy. ATT only with real tracking SDKs |
+| 1.3 | Kids-category SDK suitability | No Kids category with any analytics or ads SDK |
+| 2.3.2 | Clear paid-feature descriptions | Description lists free vs Pro, trial, renewal, Terms/Privacy |
 | 3.1.2 | (rule) | Paywall: price, period, trial, auto-renew, Restore, Terms, Privacy |
 | 5.1.2(i) | (proactive) | Explicit consent naming the AI provider before sending user data |
 | 4.3 | (risk) | Two similar apps on one account. Check the library's `apps` for overlap before naming a new one |
 
 The ASC API shows submission history but **not** the rejection text. That lives in
-Resolution Center / each app's History page (🌐), which goes back about 180 days. Older
-texts can be found by grepping `~/.claude/projects/*/*.jsonl` for "Guideline" / "We noticed".
+Resolution Center / each app's History page (🌐), which goes back about 180 days. Use only review correspondence supplied or authorized for the current app; do not search
+unrelated chat logs.
 
 
 ## App Store Connect
@@ -69,7 +68,7 @@ texts can be found by grepping `~/.claude/projects/*/*.jsonl` for "Guideline" / 
   checks. Call `Purchases.logIn(deviceId)` before the first server call.
 - Superwall paywall-as-code works (`superwall create`, `npx superwall@latest publish`).
   Native fallback after 4 s.
-- Expo: the `useUser().update` dependency-array loop froze onboarding (200 % CPU). Use refs.
+- Expo: avoid dependency-array loops involving `useUser().update`; use stable refs.
 
 ## Build / tooling
 

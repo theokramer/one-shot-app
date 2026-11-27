@@ -70,8 +70,7 @@ and uploads with `altool`, then optionally runs `fastlane deliver` for metadata.
 ## QA in the simulator
 
 - Your own device: `xcrun simctl create "<App> QA" "iPhone 17 Pro"`, and always pass that
-  UDID. Another session's app once appeared on the shared simulator and got tapped by
-  mistake.
+  UDID to avoid interacting with another session's app.
 - Taps sometimes stop arriving while the app is fine. Check with `sample <pid>`; if the
   main thread is idle, `xcrun simctl shutdown <udid> && xcrun simctl boot <udid>`. Don't
   chase it as an app bug.

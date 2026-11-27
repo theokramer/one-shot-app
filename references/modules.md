@@ -57,8 +57,7 @@ list.
 
 `superwall asc offers create` (introductory offer, `FREE_TRIAL`, e.g. `THREE_DAYS`) on the
 yearly product, in all territories. The paywall shows the trial only when the store says the
-user is eligible. Never prime "your trial reminder" before the paywall. The user rejected
-that: a reminder screen before anyone has started a trial makes no sense.
+user is eligible. Show trial reminders only after a trial has actually started.
 
 ## Retention & discounts
 

@@ -31,7 +31,7 @@ immediately gives you two disagreeing sources of truth. Don't.
 
 ## Step 1: Provision RevenueCat with the `rc` CLI
 
-The `rc` CLI is the path the last three apps used, and the user's standing instruction:
+Use the `rc` CLI for RevenueCat provisioning:
 **`rc` only, always `--project-id`, never change the default project, never the RevenueCat
 MCP, never the dashboard in a browser.** The `revenuecat-cli` skill is the flag reference
 (`rc commands --schemas --json` for exact flags).

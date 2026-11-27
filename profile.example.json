@@ -1,5 +1,5 @@
 {
-  "_comment": "Template for the one-shot-app library: everything the skill learns about its user, so no run asks the same thing twice. The real file lives at ~/.one-shot-app/profile.json (created on first use), never in the skill folder or a repo. Imprint fields are published on each app's website; reviewContact goes to App Review only; nothing else leaves the machine. Secrets belong in ~/.one-shot-app/config.json.",
+  "_comment": "Template for the local one-shot-app library. The real file lives at ~/.one-shot-app/profile.json, never in the skill folder or a repository. Approved imprint fields are published on app websites; reviewContact is sent to App Store Connect. Values printed by tools or included in chat enter the assistant context. Read only what the current task needs. Secrets belong in ~/.one-shot-app/config.json.",
   "version": 1,
   "identity": {
     "_comment": "Who publishes the apps.",

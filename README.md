@@ -6,9 +6,8 @@
 **Pitch an iOS app, tick a few boxes, do the sign-ins, and walk away.** Hours later there's
 a finished, monetized app in App Store Connect, waiting only for you to press "Submit".
 
-It was built from shipping four real subscription apps (one SwiftUI, three Expo), and every
-rule in it comes from something that broke along the way, including real App Review
-rejections.
+It combines app scaffolding, monetization, store preparation and reusable implementation
+guidance in one workflow.
 
 ## What one run does
 
@@ -61,8 +60,8 @@ Then in Claude Code: `/one-shot-app`, or just say "build me an app".
 
 ## Your data stays yours
 
-The skill folder contains **no personal data**, so you can update or share it freely.
-On first use it asks for what it needs (mostly multiple choice) and saves it to
+Keep personal data outside the skill folder. On first use it asks for what it needs
+(mostly multiple choice) and saves it to
 `~/.one-shot-app/` on your Mac:
 
 | File | What |
@@ -73,6 +72,13 @@ On first use it asks for what it needs (mostly multiple choice) and saves it to
 
 Nothing is asked twice. Each run needs fewer clicks than the last. Set `ONE_SHOT_HOME` to
 keep the data somewhere else.
+
+Local storage does not mean that data can never leave the machine. Approved imprint
+details are published on app websites; review contact is sent to App Store Connect;
+service integrations receive the account data they need. Anything printed by a tool or
+included in chat enters the assistant context. The skill starts with a redacted summary
+and uses local scripts for private fields. Enter personal contact details with
+`profile.py set-private <field>` in your own terminal.
 
 ## Guardrails
 
@@ -89,9 +95,16 @@ video and GIF. See [assets/demo/README.md](assets/demo/README.md).
 ## Sharing a modified copy
 
 ```bash
-python3 assets/scripts/package.py scan          # proves no personal data is in the shared files
-python3 assets/scripts/package.py zip ~/Desktop  # clean zip
+python3 assets/scripts/package.py scan            # current files, including tracked private files
+python3 assets/scripts/package.py scan --history  # also reachable commits and author metadata
+python3 assets/scripts/package.py zip ~/Desktop   # filtered source package after a current-file scan
 ```
+
+The scanner checks known personal values and common patterns; it cannot prove anonymity.
+Review the output and any text or media manually. Git history and the repository owner's
+GitHub identity remain public even when the latest files have been cleaned. Packaging
+excludes private notes, environment files, contact exports and media, and does not include
+Git history. It refuses to export into a nonempty directory so stale files cannot leak.
 
 ## License
 

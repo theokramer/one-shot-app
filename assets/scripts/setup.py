@@ -104,7 +104,7 @@ def detect():
         "note": "MCP connections (Mobbin, Appllama) are checked with ToolSearch; installed is not the same as connected.",
         "githubLogin": gh, "githubOrgs": orgs,
         "bundlePrefixSuggestions": [f"com.{gh.lower()}"] + [f"com.{o.lower()}" for o in orgs[:2]] if gh else [],
-        "gitName": git_name, "gitEmail": git_email,
+        "gitIdentityConfigured": bool(git_name and git_email),
         "projectDirs": dirs,
         "xcode": bool(shutil.which("xcodebuild")),
         "tools": {t: bool(shutil.which(t)) for t in ("gh", "rc", "superwall", "fastlane", "ffmpeg", "node", "pod")},
